@@ -5,6 +5,18 @@
   --font-sans: "Inter", "system-ui", "-apple-system", "sans-serif";
 }
 
+/* ── KaTeX Block Formulas ── */
+.katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.5rem 0;
+  text-align: center;
+}
+
+.katex-display > .katex {
+  white-space: nowrap;
+}
+
 /* ── Ghost Card Base ── */
 .kg-card {
   margin: 2rem 0;
