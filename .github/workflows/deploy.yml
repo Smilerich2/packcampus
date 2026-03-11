@@ -1,0 +1,25 @@
+name: Deploy PackCampus
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to server
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            cd /opt/packcampus
+            git pull origin main
+            docker compose down
+            docker compose build --no-cache
+            docker compose up -d
+            # Remove old/dangling images to keep disk clean
+            docker image prune -af --filter "until=1h"
+            echo "Deploy complete: $(date)"
