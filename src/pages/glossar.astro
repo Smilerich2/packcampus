@@ -1,0 +1,212 @@
+---
+import Layout from "../layouts/Layout.astro";
+import GhostContentAPI from "@tryghost/content-api";
+
+const ghost = new GhostContentAPI({
+  url: import.meta.env.PUBLIC_GHOST_URL,
+  key: import.meta.env.PUBLIC_GHOST_CONTENT_API_KEY,
+  version: "v5.0",
+});
+
+const posts = await ghost.posts.browse({
+  limit: "all",
+  filter: "tag:glossar",
+  include: "tags",
+});
+
+posts.sort((a, b) => a.title.localeCompare(b.title, "de"));
+
+const grouped = {};
+for (const post of posts) {
+  const letter = post.title.charAt(0).toUpperCase();
+  if (!grouped[letter]) grouped[letter] = [];
+  grouped[letter].push(post);
+}
+
+const letters = Object.keys(grouped).sort((a, b) => a.localeCompare(b, "de"));
+---
+
+<Layout title="Glossar">
+  <!-- Header -->
+  <header class="bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
+      <a href="/" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
+        <div class="w-9 h-9 bg-orange-500 rounded-lg flex items-center justify-center">
+          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+          </svg>
+        </div>
+        <span class="text-lg font-semibold tracking-tight">PackCampus</span>
+      </a>
+      <nav class="flex items-center gap-6">
+        <button onclick="toggleGlossary(true)" class="text-sm text-orange-500 font-medium cursor-pointer">Glossar</button>
+        <a href="/" class="flex items-center gap-2 text-sm text-gray-400 hover:text-orange-500 transition-colors font-medium">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+          Alle Themen
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="max-w-6xl mx-auto px-6 pt-16 pb-10">
+    <p class="text-sm font-medium text-orange-500 tracking-wide uppercase mb-3">Nachschlagewerk</p>
+    <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight text-gray-900 leading-tight">
+      Glossar
+    </h1>
+    <p class="mt-4 text-lg text-gray-500 max-w-2xl leading-relaxed">
+      Wichtige Fachbegriffe aus der Welt der Packmitteltechnologie — alphabetisch sortiert und verständlich erklärt.
+    </p>
+  </section>
+
+  <!-- Search -->
+  <section class="max-w-6xl mx-auto px-6 pb-8">
+    <div class="relative max-w-xl">
+      <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-orange-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+      </svg>
+      <input
+        id="glossar-search"
+        type="text"
+        autocomplete="off"
+        placeholder="Fachbegriff suchen..."
+        class="w-full pl-12 pr-4 py-4 bg-white border border-gray-200/60 rounded-2xl shadow-sm text-gray-900 placeholder-gray-400 outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100 transition-all"
+      />
+    </div>
+  </section>
+
+  <!-- No results -->
+  <div id="glossar-no-results" class="hidden max-w-6xl mx-auto px-6 pb-12">
+    <div class="text-center py-16">
+      <div class="w-14 h-14 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-5">
+        <svg class="w-7 h-7 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+      </div>
+      <h3 class="text-lg font-semibold text-gray-400 mb-1">Keine Ergebnisse gefunden</h3>
+      <p class="text-sm text-gray-400">Versuche einen anderen Suchbegriff.</p>
+    </div>
+  </div>
+
+  <!-- Letter navigation -->
+  {letters.length > 0 && (
+    <section id="letter-nav" class="max-w-6xl mx-auto px-6 pb-8">
+      <div class="flex flex-wrap gap-2">
+        {letters.map((letter) => (
+          <a
+            href={`#letter-${letter}`}
+            class="w-10 h-10 flex items-center justify-center rounded-lg text-sm font-semibold bg-white border border-gray-200/60 text-gray-600 hover:bg-orange-500 hover:text-white hover:border-orange-500 transition-all duration-200 shadow-sm"
+          >
+            {letter}
+          </a>
+        ))}
+      </div>
+    </section>
+  )}
+
+  <!-- Glossar entries -->
+  <section id="glossar-entries" class="max-w-6xl mx-auto px-6 pb-24">
+    {letters.length > 0 ? (
+      <div class="space-y-12">
+        {letters.map((letter) => (
+          <div id={`letter-${letter}`} class="letter-group scroll-mt-24">
+            <div class="flex items-center gap-4 mb-6">
+              <div class="w-12 h-12 bg-orange-500 rounded-xl flex items-center justify-center shadow-sm">
+                <span class="text-xl font-bold text-white">{letter}</span>
+              </div>
+              <div class="flex-1 h-px bg-gradient-to-r from-orange-200 via-orange-100 to-transparent" />
+            </div>
+            <div class="space-y-3">
+              {grouped[letter].map((post) => (
+                <details class="glossar-entry group bg-white rounded-xl border border-gray-200/60 shadow-sm overflow-hidden" data-title={post.title.toLowerCase()} data-excerpt={(post.excerpt || "").toLowerCase()}>
+                  <summary class="flex items-center justify-between px-6 py-5 cursor-pointer select-none hover:bg-gray-50/50 transition-colors">
+                    <h3 class="text-lg font-semibold text-gray-900 group-hover:text-orange-600 transition-colors">
+                      {post.title}
+                    </h3>
+                    <svg class="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform duration-200 flex-shrink-0 ml-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </summary>
+                  <div class="px-6 pb-6 pt-0">
+                    <div class="h-px bg-gray-100 mb-5" />
+                    <div
+                      class="prose prose-gray max-w-none
+                        prose-headings:font-semibold prose-headings:tracking-tight
+                        prose-p:leading-relaxed prose-p:text-gray-600
+                        prose-a:text-orange-600 prose-a:no-underline hover:prose-a:underline
+                        prose-strong:text-gray-800 prose-strong:font-semibold
+                        prose-li:text-gray-600"
+                      set:html={post.html}
+                    />
+                    <div class="mt-5">
+                      <a
+                        href={`/post/${post.slug}`}
+                        class="inline-flex items-center gap-1.5 text-sm font-medium text-orange-500 hover:text-orange-600 transition-colors"
+                      >
+                        Vollständigen Beitrag lesen
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                        </svg>
+                      </a>
+                    </div>
+                  </div>
+                </details>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    ) : (
+      <div class="text-center py-20">
+        <div class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
+          <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+          </svg>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-400 mb-2">Noch keine Glossareinträge</h3>
+        <p class="text-sm text-gray-400">Erstelle Beiträge in Ghost mit dem Tag "Glossar", um Fachbegriffe hier anzuzeigen.</p>
+      </div>
+    )}
+  </section>
+
+  <script>
+    const glossarInput = document.getElementById("glossar-search");
+    const glossarEntries = document.querySelectorAll(".glossar-entry");
+    const letterGroups = document.querySelectorAll(".letter-group");
+    const letterNav = document.getElementById("letter-nav");
+    const entriesSection = document.getElementById("glossar-entries");
+    const glossarNoResults = document.getElementById("glossar-no-results");
+
+    if (glossarInput) {
+      glossarInput.addEventListener("input", () => {
+        const q = glossarInput.value.trim().toLowerCase();
+        let totalVisible = 0;
+
+        glossarEntries.forEach((entry) => {
+          const title = entry.dataset.title || "";
+          const excerpt = entry.dataset.excerpt || "";
+          const match = !q || title.includes(q) || excerpt.includes(q);
+          entry.style.display = match ? "" : "none";
+          if (match) totalVisible++;
+        });
+
+        letterGroups.forEach((group) => {
+          const visibleInGroup = group.querySelectorAll('.glossar-entry:not([style*="display: none"])').length;
+          group.style.display = visibleInGroup > 0 ? "" : "none";
+        });
+
+        if (glossarNoResults) {
+          glossarNoResults.classList.toggle("hidden", totalVisible > 0 || !q);
+        }
+        if (entriesSection) {
+          entriesSection.classList.toggle("hidden", totalVisible === 0 && !!q);
+        }
+        if (letterNav) {
+          letterNav.classList.toggle("hidden", totalVisible === 0 || !!q);
+        }
+      });
+    }
+  </script>
+</Layout>

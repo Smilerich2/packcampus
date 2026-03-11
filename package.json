@@ -12,6 +12,11 @@
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "^6.0.2"
+    "@astrojs/node": "^10.0.0",
+    "@tailwindcss/typography": "^0.5.19",
+    "@tailwindcss/vite": "^4.2.1",
+    "@tryghost/content-api": "^1.12.5",
+    "astro": "^6.0.2",
+    "tailwindcss": "^4.2.1"
   }
 }

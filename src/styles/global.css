@@ -1,0 +1,367 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@theme {
+  --font-sans: "Inter", "system-ui", "-apple-system", "sans-serif";
+}
+
+/* ── Ghost Card Base ── */
+.kg-card {
+  margin: 2rem 0;
+}
+
+/* ── Ghost Video Card ── */
+.kg-video-card {
+  position: relative;
+  width: 100%;
+}
+
+.kg-video-container {
+  position: relative;
+  width: 100%;
+  border-radius: 1rem;
+  overflow: hidden;
+  background: #000;
+}
+
+.kg-video-container video {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  object-fit: contain;
+  background: #000;
+  accent-color: #f97316;
+}
+
+/* Overlay (big play button before playback) */
+.kg-video-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  transition: background 0.2s, opacity 0.3s;
+  z-index: 2;
+}
+
+/* When video has native controls, keep overlay above but let clicks through to JS handler */
+.kg-video-container video[controls] ~ .kg-video-player-container {
+  display: none;
+}
+
+.kg-video-overlay:hover {
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.kg-video-large-play-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: #f97316;
+  color: #fff;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 24px rgba(249, 115, 22, 0.35);
+}
+
+.kg-video-large-play-icon:hover {
+  transform: scale(1.08);
+  box-shadow: 0 6px 32px rgba(249, 115, 22, 0.5);
+}
+
+.kg-video-large-play-icon svg {
+  width: 28px;
+  height: 28px;
+}
+
+/* Player controls bar */
+.kg-video-player-container {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+  z-index: 3;
+  transition: opacity 0.3s;
+}
+
+.kg-video-player {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+/* Play / Pause buttons */
+.kg-video-play-icon,
+.kg-video-pause-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(4px);
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.2s;
+  padding: 0;
+}
+
+.kg-video-play-icon:hover,
+.kg-video-pause-icon:hover {
+  background: #f97316;
+}
+
+.kg-video-play-icon svg,
+.kg-video-pause-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Current time / duration */
+.kg-video-current-time,
+.kg-video-duration {
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.8);
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+/* Seek slider */
+.kg-video-seek-slider {
+  flex: 1;
+  height: 4px;
+  appearance: none;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+
+.kg-video-seek-slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #f97316;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+}
+
+.kg-video-seek-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #f97316;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+}
+
+/* Volume */
+.kg-video-mute-icon,
+.kg-video-unmute-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: none;
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.2s;
+}
+
+.kg-video-mute-icon:hover,
+.kg-video-unmute-icon:hover {
+  color: #f97316;
+}
+
+.kg-video-mute-icon svg,
+.kg-video-unmute-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.kg-video-volume-slider {
+  width: 60px;
+  height: 4px;
+  appearance: none;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.kg-video-volume-slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+}
+
+.kg-video-volume-slider::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+}
+
+/* Playback rate button */
+.kg-video-playback-rate {
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: color 0.2s, background 0.2s;
+}
+
+.kg-video-playback-rate:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Hide utility */
+.kg-video-hide {
+  display: none !important;
+}
+
+/* ── Ghost Image Card ── */
+.kg-image-card {
+  margin: 2rem 0;
+}
+
+.kg-image-card img {
+  width: 100%;
+  height: auto;
+  border-radius: 1rem;
+}
+
+/* ── Ghost Figcaptions ── */
+.kg-card figcaption {
+  margin-top: 0.75rem;
+  font-size: 0.8125rem;
+  font-style: italic;
+  color: #9ca3af;
+  text-align: center;
+  line-height: 1.5;
+}
+
+/* ── Ghost Gallery Card ── */
+.kg-gallery-card {
+  margin: 2rem 0;
+}
+
+.kg-gallery-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.kg-gallery-row {
+  display: flex;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.kg-gallery-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 0.75rem;
+}
+
+/* ── Ghost Bookmark Card ── */
+.kg-bookmark-card {
+  margin: 2rem 0;
+  border: 1px solid #e5e7eb;
+  border-radius: 1rem;
+  overflow: hidden;
+  transition: box-shadow 0.2s;
+}
+
+.kg-bookmark-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.kg-bookmark-container {
+  display: flex;
+  text-decoration: none;
+  color: inherit;
+}
+
+.kg-bookmark-content {
+  flex: 1;
+  padding: 1rem 1.25rem;
+}
+
+.kg-bookmark-title {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.kg-bookmark-description {
+  margin-top: 0.25rem;
+  font-size: 0.8125rem;
+  color: #6b7280;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.kg-bookmark-metadata {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+.kg-bookmark-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.kg-bookmark-thumbnail {
+  width: 160px;
+  flex-shrink: 0;
+}
+
+.kg-bookmark-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}

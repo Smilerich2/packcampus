@@ -1,0 +1,458 @@
+---
+import GhostContentAPI from "@tryghost/content-api";
+import "../styles/global.css";
+
+const { title } = Astro.props;
+
+const ghost = new GhostContentAPI({
+  url: import.meta.env.PUBLIC_GHOST_URL,
+  key: import.meta.env.PUBLIC_GHOST_CONTENT_API_KEY,
+  version: "v5.0",
+});
+
+const glossarPosts = await ghost.posts.browse({
+  limit: "all",
+  filter: "tag:glossar",
+  include: "tags",
+});
+
+glossarPosts.sort((a, b) => a.title.localeCompare(b.title, "de"));
+
+const glossarGrouped = {};
+for (const post of glossarPosts) {
+  const letter = post.title.charAt(0).toUpperCase();
+  if (!glossarGrouped[letter]) glossarGrouped[letter] = [];
+  glossarGrouped[letter].push(post);
+}
+const glossarLetters = Object.keys(glossarGrouped).sort((a, b) => a.localeCompare(b, "de"));
+---
+
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title} - PackCampus</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+
+  <body class="bg-gray-50 text-gray-900 font-sans antialiased">
+    <slot />
+
+    <!-- Footer -->
+    <footer class="border-t border-gray-100 bg-white">
+      <div class="max-w-6xl mx-auto px-6 py-8 text-center">
+        <p class="text-sm text-gray-400">&copy; 2026 PackCampus &middot; Alle Rechte vorbehalten</p>
+      </div>
+    </footer>
+
+    <!-- Feedback Button -->
+    <button
+      onclick="toggleFeedback(true)"
+      class="fixed bottom-6 right-6 z-50 w-12 h-12 bg-orange-500 hover:bg-orange-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center group"
+      aria-label="Feedback geben"
+    >
+      <svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+      </svg>
+    </button>
+
+    <!-- Feedback Modal Backdrop -->
+    <div id="feedbackBackdrop" onclick="toggleFeedback(false)" class="fixed inset-0 bg-black/40 z-[80] opacity-0 pointer-events-none transition-opacity duration-300"></div>
+
+    <!-- Feedback Modal -->
+    <div id="feedbackModal" class="fixed inset-0 z-[90] flex items-center justify-center p-4 pointer-events-none">
+      <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md transform scale-95 opacity-0 transition-all duration-300 pointer-events-auto" id="feedbackCard" style="display:none">
+        <div class="flex items-center justify-between px-6 py-5 border-b border-gray-100">
+          <h2 class="text-lg font-semibold tracking-tight">Feedback geben</h2>
+          <button onclick="toggleFeedback(false)" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <form id="feedbackForm" class="p-6 space-y-4">
+          <!-- Type selector -->
+          <div class="flex gap-2" id="feedbackTypes">
+            <button type="button" data-type="lob" class="feedback-type-btn flex-1 py-2.5 px-3 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:border-orange-300 hover:text-orange-600 transition-all cursor-pointer">
+              Lob
+            </button>
+            <button type="button" data-type="fehler" class="feedback-type-btn flex-1 py-2.5 px-3 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:border-orange-300 hover:text-orange-600 transition-all cursor-pointer">
+              Fehler
+            </button>
+            <button type="button" data-type="vorschlag" class="feedback-type-btn flex-1 py-2.5 px-3 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:border-orange-300 hover:text-orange-600 transition-all cursor-pointer">
+              Vorschlag
+            </button>
+          </div>
+
+          <!-- Name + Klasse row -->
+          <div class="grid grid-cols-2 gap-3">
+            <input
+              id="feedbackName"
+              type="text"
+              placeholder="Name *"
+              autocomplete="name"
+              class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200/60 rounded-xl text-sm text-gray-900 placeholder-gray-400 outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100 focus:bg-white transition-all"
+            />
+            <input
+              id="feedbackKlasse"
+              type="text"
+              placeholder="Klasse *"
+              autocomplete="off"
+              class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200/60 rounded-xl text-sm text-gray-900 placeholder-gray-400 outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100 focus:bg-white transition-all"
+            />
+          </div>
+
+          <!-- Email -->
+          <input
+            id="feedbackEmail"
+            type="email"
+            placeholder="E-Mail *"
+            autocomplete="email"
+            class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200/60 rounded-xl text-sm text-gray-900 placeholder-gray-400 outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100 focus:bg-white transition-all"
+          />
+
+          <!-- Honeypot (invisible to humans) -->
+          <div class="absolute -left-[9999px]" aria-hidden="true">
+            <input id="feedbackWebsite" type="text" tabindex="-1" autocomplete="off" />
+          </div>
+
+          <!-- Message -->
+          <textarea
+            id="feedbackMessage"
+            rows="3"
+            placeholder="Was möchtest du mir mitteilen? (mind. 10 Zeichen) *"
+            class="w-full px-4 py-3 bg-gray-50 border border-gray-200/60 rounded-xl text-sm text-gray-900 placeholder-gray-400 outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100 focus:bg-white transition-all resize-none"
+          ></textarea>
+
+          <!-- Status -->
+          <div id="feedbackStatus" class="hidden text-sm text-center py-2 rounded-xl"></div>
+
+          <!-- Submit -->
+          <button
+            type="submit"
+            id="feedbackSubmit"
+            class="w-full py-3 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Absenden
+          </button>
+
+          <p class="text-xs text-gray-400 text-center">Max. 5 Feedbacks pro Stunde</p>
+        </form>
+      </div>
+    </div>
+
+    <!-- Backdrop -->
+    <div id="backdrop" onclick="toggleGlossary(false)" class="fixed inset-0 bg-black/40 z-[60] opacity-0 pointer-events-none transition-opacity duration-300"></div>
+
+    <!-- Glossary Side Panel -->
+    <aside id="glossaryPanel" class="fixed top-0 right-0 bottom-0 w-full md:w-[450px] bg-white z-[70] translate-x-full transition-transform duration-300 ease-out shadow-2xl flex flex-col">
+      <!-- Panel Header -->
+      <div class="flex items-center justify-between px-6 py-5 border-b border-gray-100 flex-shrink-0">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
+            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+          </div>
+          <h2 class="text-lg font-semibold tracking-tight">Glossar</h2>
+        </div>
+        <button onclick="toggleGlossary(false)" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Panel Search -->
+      <div class="px-6 py-4 border-b border-gray-100 flex-shrink-0">
+        <div class="relative">
+          <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-orange-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input
+            id="panel-search"
+            type="text"
+            autocomplete="off"
+            placeholder="Fachbegriff suchen..."
+            class="w-full pl-9 pr-4 py-2.5 text-sm bg-gray-50 border border-gray-200/60 rounded-xl text-gray-900 placeholder-gray-400 outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100 focus:bg-white transition-all"
+          />
+        </div>
+      </div>
+
+      <!-- Panel Content -->
+      <div class="flex-1 overflow-y-auto" id="panel-content">
+        {glossarLetters.length > 0 ? (
+          <div class="px-6 py-4 space-y-8">
+            {glossarLetters.map((letter) => (
+              <div class="glossar-letter-group" id={`panel-letter-${letter}`}>
+                <div class="flex items-center gap-3 mb-3">
+                  <span class="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center text-white font-bold text-sm flex-shrink-0">{letter}</span>
+                  <div class="flex-1 h-px bg-gradient-to-r from-orange-200 via-orange-100 to-transparent" />
+                </div>
+                <div class="space-y-2">
+                  {glossarGrouped[letter].map((post) => (
+                    <details
+                      class="glossar-panel-entry group bg-gray-50 rounded-xl overflow-hidden"
+                      data-slug={post.slug}
+                      data-title={post.title.toLowerCase()}
+                      data-excerpt={(post.excerpt || "").toLowerCase()}
+                    >
+                      <summary class="flex items-center justify-between px-4 py-3 cursor-pointer select-none hover:bg-orange-50 transition-colors text-sm font-medium text-gray-900">
+                        <span>{post.title}</span>
+                        <svg class="w-4 h-4 text-gray-400 group-open:rotate-180 transition-transform duration-200 flex-shrink-0 ml-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </summary>
+                      <div class="px-4 pb-4 pt-1">
+                        <div
+                          class="prose prose-sm prose-gray max-w-none
+                            prose-p:leading-relaxed prose-p:text-gray-600
+                            prose-a:text-orange-600 prose-strong:text-gray-800
+                            prose-li:text-gray-600"
+                          set:html={post.html}
+                        />
+                      </div>
+                    </details>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div class="px-6 py-16 text-center">
+            <p class="text-sm text-gray-400">Noch keine Glossareinträge vorhanden.</p>
+          </div>
+        )}
+        <div id="panel-no-results" class="hidden px-6 py-16 text-center">
+          <svg class="w-10 h-10 text-gray-200 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <p class="text-sm text-gray-400">Kein Fachbegriff gefunden.</p>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Feedback toggle (inline for immediate availability) -->
+    <script is:inline>
+      function toggleFeedback(isOpen) {
+        var backdrop = document.getElementById('feedbackBackdrop');
+        var card = document.getElementById('feedbackCard');
+        if (isOpen) {
+          card.style.display = '';
+          requestAnimationFrame(function() {
+            backdrop.classList.remove('opacity-0', 'pointer-events-none');
+            backdrop.classList.add('opacity-100');
+            card.classList.remove('scale-95', 'opacity-0');
+            card.classList.add('scale-100', 'opacity-100');
+          });
+        } else {
+          backdrop.classList.add('opacity-0', 'pointer-events-none');
+          backdrop.classList.remove('opacity-100');
+          card.classList.add('scale-95', 'opacity-0');
+          card.classList.remove('scale-100', 'opacity-100');
+          setTimeout(function() { card.style.display = 'none'; }, 300);
+        }
+      }
+    </script>
+
+    <!-- Feedback form logic -->
+    <script>
+      const feedbackForm = document.getElementById("feedbackForm");
+      const feedbackName = document.getElementById("feedbackName") as HTMLInputElement;
+      const feedbackKlasse = document.getElementById("feedbackKlasse") as HTMLInputElement;
+      const feedbackEmail = document.getElementById("feedbackEmail") as HTMLInputElement;
+      const feedbackMessage = document.getElementById("feedbackMessage") as HTMLTextAreaElement;
+      const feedbackWebsite = document.getElementById("feedbackWebsite") as HTMLInputElement;
+      const feedbackStatus = document.getElementById("feedbackStatus")!;
+      const feedbackSubmit = document.getElementById("feedbackSubmit") as HTMLButtonElement;
+      const typeButtons = document.querySelectorAll(".feedback-type-btn");
+      let selectedType = "";
+      let modalOpenedAt = 0;
+
+      // Track when modal opens for minimum time check
+      const origToggle = (window as any).toggleFeedback;
+      (window as any).toggleFeedback = function (isOpen: boolean) {
+        if (isOpen) modalOpenedAt = Date.now();
+        origToggle(isOpen);
+      };
+
+      typeButtons.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          selectedType = (btn as HTMLElement).dataset.type || "";
+          typeButtons.forEach((b) => {
+            b.classList.remove("border-orange-500", "bg-orange-50", "text-orange-600");
+            b.classList.add("border-gray-200", "text-gray-600");
+          });
+          btn.classList.add("border-orange-500", "bg-orange-50", "text-orange-600");
+          btn.classList.remove("border-gray-200", "text-gray-600");
+        });
+      });
+
+      feedbackForm?.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        // Minimum time check (3 seconds)
+        if (Date.now() - modalOpenedAt < 3000) {
+          showStatus("Bitte nimm dir einen Moment Zeit für dein Feedback.", "error");
+          return;
+        }
+
+        const name = feedbackName?.value.trim();
+        const klasse = feedbackKlasse?.value.trim();
+        const email = feedbackEmail?.value.trim();
+        const message = feedbackMessage?.value.trim();
+
+        if (!selectedType) {
+          showStatus("Bitte wähle einen Feedback-Typ.", "error");
+          return;
+        }
+        if (!name || !klasse || !email) {
+          showStatus("Bitte fülle alle Felder aus.", "error");
+          return;
+        }
+        if (!message || message.length < 10) {
+          showStatus("Die Nachricht muss mindestens 10 Zeichen haben.", "error");
+          return;
+        }
+
+        feedbackSubmit.disabled = true;
+        feedbackSubmit.textContent = "Wird gesendet...";
+
+        try {
+          const res = await fetch("/api/feedback", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              type: selectedType,
+              name,
+              klasse,
+              email,
+              message,
+              url: window.location.pathname,
+              website: feedbackWebsite?.value || "",
+            }),
+          });
+
+          const data = await res.json();
+
+          if (!res.ok) {
+            showStatus(data.error || "Senden fehlgeschlagen.", "error");
+            return;
+          }
+
+          showStatus("Danke für dein Feedback!", "success");
+          feedbackMessage.value = "";
+          feedbackName.value = "";
+          feedbackKlasse.value = "";
+          feedbackEmail.value = "";
+          selectedType = "";
+          typeButtons.forEach((b) => {
+            b.classList.remove("border-orange-500", "bg-orange-50", "text-orange-600");
+            b.classList.add("border-gray-200", "text-gray-600");
+          });
+
+          setTimeout(() => (window as any).toggleFeedback(false), 1500);
+        } catch {
+          showStatus("Senden fehlgeschlagen. Bitte versuche es erneut.", "error");
+        } finally {
+          feedbackSubmit.disabled = false;
+          feedbackSubmit.textContent = "Absenden";
+        }
+      });
+
+      function showStatus(msg: string, type: "success" | "error") {
+        feedbackStatus.textContent = msg;
+        feedbackStatus.classList.remove("hidden", "text-green-600", "bg-green-50", "text-red-600", "bg-red-50");
+        if (type === "success") {
+          feedbackStatus.classList.add("text-green-600", "bg-green-50");
+        } else {
+          feedbackStatus.classList.add("text-red-600", "bg-red-50");
+        }
+      }
+    </script>
+
+    <!-- Glossary toggle & panel search (inline for immediate availability) -->
+    <script is:inline>
+      function toggleGlossary(isOpen) {
+        var panel = document.getElementById('glossaryPanel');
+        var backdrop = document.getElementById('backdrop');
+        if (isOpen) {
+          panel.classList.remove('translate-x-full');
+          panel.classList.add('translate-x-0');
+          backdrop.classList.remove('opacity-0', 'pointer-events-none');
+          backdrop.classList.add('opacity-100');
+          document.body.classList.add('overflow-hidden');
+        } else {
+          panel.classList.add('translate-x-full');
+          panel.classList.remove('translate-x-0');
+          backdrop.classList.add('opacity-0', 'pointer-events-none');
+          backdrop.classList.remove('opacity-100');
+          document.body.classList.remove('overflow-hidden');
+        }
+      }
+
+      function openGlossaryTerm(slug) {
+        toggleGlossary(true);
+        setTimeout(function() {
+          var entry = document.querySelector('[data-slug="' + slug + '"]');
+          if (entry) {
+            entry.open = true;
+            entry.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 350);
+      }
+    </script>
+
+    <!-- Panel search filtering (module script) -->
+    <script>
+      const panelSearch = document.getElementById("panel-search");
+      const panelEntries = document.querySelectorAll(".glossar-panel-entry");
+      const panelGroups = document.querySelectorAll(".glossar-letter-group");
+      const panelNoResults = document.getElementById("panel-no-results");
+      const panelContentInner = document.querySelector("#panel-content > div:first-child");
+
+      if (panelSearch) {
+        panelSearch.addEventListener("input", () => {
+          const q = panelSearch.value.trim().toLowerCase();
+          let total = 0;
+
+          panelEntries.forEach((entry) => {
+            const title = entry.dataset.title || "";
+            const excerpt = entry.dataset.excerpt || "";
+            const match = !q || title.includes(q) || excerpt.includes(q);
+            entry.style.display = match ? "" : "none";
+            if (match) total++;
+          });
+
+          panelGroups.forEach((group) => {
+            const visible = group.querySelectorAll('.glossar-panel-entry:not([style*="display: none"])').length;
+            group.style.display = visible > 0 ? "" : "none";
+          });
+
+          if (panelNoResults) {
+            panelNoResults.classList.toggle("hidden", total > 0 || !q);
+          }
+          if (panelContentInner) {
+            panelContentInner.classList.toggle("hidden", total === 0 && !!q);
+          }
+        });
+      }
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          const panel = document.getElementById("glossaryPanel");
+          if (panel && !panel.classList.contains("translate-x-full")) {
+            toggleGlossary(false);
+          }
+        }
+      });
+    </script>
+  </body>
+</html>

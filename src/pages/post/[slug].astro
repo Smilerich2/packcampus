@@ -1,0 +1,143 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import GhostContentAPI from "@tryghost/content-api";
+
+const ghost = new GhostContentAPI({
+  url: import.meta.env.PUBLIC_GHOST_URL,
+  key: import.meta.env.PUBLIC_GHOST_CONTENT_API_KEY,
+  version: "v5.0",
+});
+
+const { slug } = Astro.params;
+
+const post = await ghost.posts.read({ slug }, { include: "tags,authors" });
+---
+
+<Layout title={post.title}>
+  <!-- Header -->
+  <header class="bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
+      <a href="/" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
+        <div class="w-9 h-9 bg-orange-500 rounded-lg flex items-center justify-center">
+          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+          </svg>
+        </div>
+        <span class="text-lg font-semibold tracking-tight">PackCampus</span>
+      </a>
+      <nav class="flex items-center gap-6">
+        <button onclick="toggleGlossary(true)" class="text-sm text-gray-400 hover:text-orange-500 transition-colors font-medium cursor-pointer">Glossar</button>
+        {post.primary_tag ? (
+          <a href={`/thema/${post.primary_tag.slug}`} class="flex items-center gap-2 text-sm text-gray-400 hover:text-orange-500 transition-colors font-medium">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+            {post.primary_tag.name}
+          </a>
+        ) : (
+          <a href="/" class="flex items-center gap-2 text-sm text-gray-400 hover:text-orange-500 transition-colors font-medium">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+            Alle Themen
+          </a>
+        )}
+      </nav>
+    </div>
+  </header>
+
+  <div class="relative overflow-x-hidden">
+    {post.feature_image && (
+      <div class="absolute inset-x-0 top-0 z-0">
+        <img
+          src={post.feature_image}
+          alt={post.feature_image_alt || post.title}
+          class="w-full"
+        />
+        <div class="absolute inset-0 bg-gradient-to-t from-gray-50 via-gray-50/60 to-transparent" />
+      </div>
+    )}
+
+    <article class={`relative z-10 max-w-3xl mx-auto px-6 pb-24 ${post.feature_image ? 'pt-48 md:pt-64 lg:pt-80' : 'pt-16'}`}>
+      <div class={post.feature_image ? 'bg-white/95 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-200/60 p-8 md:p-10' : ''}>
+        <div class="flex items-center gap-3 text-sm text-gray-400 mb-6">
+          {post.primary_tag && (
+            <a href={`/thema/${post.primary_tag.slug}`} class="font-medium text-orange-500 hover:text-orange-600 transition-colors">
+              {post.primary_tag.name}
+            </a>
+          )}
+          {post.primary_tag && <span>&middot;</span>}
+          {post.primary_author && (
+            <span class="font-medium text-gray-500">{post.primary_author.name}</span>
+          )}
+          <span>&middot;</span>
+          <time datetime={post.published_at}>
+            {new Date(post.published_at).toLocaleDateString("de-DE", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}
+          </time>
+          <span>&middot;</span>
+          <span>{post.reading_time} Min. Lesezeit</span>
+        </div>
+
+        <h1 class="text-3xl md:text-4xl font-bold tracking-tight text-gray-900 leading-tight">
+          {post.title}
+        </h1>
+
+        <div class="mt-8 mb-10 h-px bg-gradient-to-r from-orange-200 via-orange-100 to-transparent" />
+
+        <div
+          class="prose prose-lg prose-gray max-w-none
+            prose-headings:font-semibold prose-headings:tracking-tight
+            prose-h2:text-2xl prose-h2:mt-12 prose-h2:mb-4
+            prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-3
+            prose-p:leading-relaxed prose-p:text-gray-600
+            prose-a:text-orange-600 prose-a:no-underline hover:prose-a:underline
+            prose-strong:text-gray-800 prose-strong:font-semibold
+            prose-blockquote:border-orange-400 prose-blockquote:bg-orange-50/50 prose-blockquote:rounded-r-lg prose-blockquote:py-1 prose-blockquote:px-1 prose-blockquote:text-gray-600 prose-blockquote:not-italic
+            prose-li:text-gray-600
+            prose-ul:my-6 prose-ol:my-6"
+          set:html={post.html}
+        />
+
+        <div class="mt-16 pt-8 border-t border-gray-100">
+          <a
+            href={post.primary_tag ? `/thema/${post.primary_tag.slug}` : "/"}
+            class="inline-flex items-center gap-2 text-sm font-medium text-orange-500 hover:text-orange-600 transition-colors"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+            {post.primary_tag ? `Zurück zu ${post.primary_tag.name}` : "Zurück zu allen Themen"}
+          </a>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <script>
+    document.querySelectorAll(".kg-video-card").forEach((card) => {
+      const video = card.querySelector("video");
+      if (!video) return;
+
+      // Clean native controls: no PiP, no download, no playback rate
+      video.setAttribute("controls", "");
+      video.setAttribute("playsinline", "");
+      video.setAttribute("disablePictureInPicture", "");
+      video.setAttribute("controlsList", "noplaybackrate nodownload");
+      video.removeAttribute("autoplay");
+
+      // If poster exists, use object-cover via CSS class
+      if (video.poster) video.classList.add("has-poster");
+
+      // Remove Ghost overlay and player bar completely — native controls handle everything
+      const overlay = card.querySelector(".kg-video-overlay");
+      const playerBar = card.querySelector(".kg-video-player-container");
+
+      if (overlay) overlay.remove();
+      if (playerBar) playerBar.remove();
+    });
+  </script>
+</Layout>

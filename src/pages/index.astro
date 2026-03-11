@@ -1,17 +1,356 @@
 ---
+import Layout from "../layouts/Layout.astro";
+import GhostContentAPI from "@tryghost/content-api";
 
+const ghost = new GhostContentAPI({
+  url: import.meta.env.PUBLIC_GHOST_URL,
+  key: import.meta.env.PUBLIC_GHOST_CONTENT_API_KEY,
+  version: "v5.0",
+});
+
+const tags = await ghost.tags.browse({
+  limit: "all",
+  include: "count.posts",
+  filter: "visibility:public",
+});
+
+// Filter out tags with no posts, internal tags, and the Glossar tag
+const visibleTags = tags.filter((tag) => tag.count?.posts > 0 && tag.slug !== "glossar");
+
+// Fetch all posts for the search index (exclude glossar posts)
+const allPosts = await ghost.posts.browse({
+  limit: "all",
+  filter: "tag:-glossar",
+  fields: "title,slug",
+  include: "tags",
+});
+
+// Fetch glossar posts for the search index
+const glossarPosts = await ghost.posts.browse({
+  limit: "all",
+  filter: "tag:glossar",
+  fields: "title,slug",
+});
+
+// Build search index
+const searchIndex = {
+  topics: visibleTags.map((t) => ({ name: t.name, slug: t.slug, description: t.description || "" })),
+  posts: allPosts.map((p) => ({ title: p.title, slug: p.slug, tag: p.primary_tag?.name || "" })),
+  glossar: glossarPosts.map((p) => ({ title: p.title, slug: p.slug })),
+};
+
+// Gradient fallbacks for tags without feature images
+const gradients = [
+  "from-orange-600 to-amber-500",
+  "from-slate-700 to-slate-500",
+  "from-orange-500 to-red-500",
+  "from-zinc-700 to-zinc-500",
+  "from-amber-600 to-yellow-500",
+  "from-stone-700 to-stone-500",
+];
+
+// Decorative icons per index (packaging / industrial themed)
+const icons = [
+  `<svg class="w-10 h-10 text-white/20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>`,
+  `<svg class="w-10 h-10 text-white/20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>`,
+  `<svg class="w-10 h-10 text-white/20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>`,
+  `<svg class="w-10 h-10 text-white/20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/></svg>`,
+  `<svg class="w-10 h-10 text-white/20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14.121 15.536c-1.171 1.952-3.07 1.952-4.242 0-1.172-1.953-1.172-5.119 0-7.072 1.171-1.952 3.07-1.952 4.242 0M8 10.5h4m-4 3h4m9-1.5a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>`,
+  `<svg class="w-10 h-10 text-white/20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>`,
+];
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<Layout title="PackCampus - Duale Ausbildung">
+  <!-- Header -->
+  <header class="bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
+      <a href="/" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
+        <div class="w-9 h-9 bg-orange-500 rounded-lg flex items-center justify-center">
+          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+          </svg>
+        </div>
+        <span class="text-lg font-semibold tracking-tight">PackCampus</span>
+      </a>
+      <nav class="flex items-center gap-6">
+        <button onclick="toggleGlossary(true)" class="text-sm text-gray-400 hover:text-orange-500 transition-colors font-medium cursor-pointer">Glossar</button>
+        <span class="text-sm text-gray-400 font-medium">Duale Ausbildung</span>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="max-w-6xl mx-auto px-6 pt-16 pb-12">
+    <p class="text-sm font-medium text-orange-500 tracking-wide uppercase mb-3">Duale Ausbildung</p>
+    <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight text-gray-900 leading-tight">
+      Wissen für angehende Packmitteltechnologen
+    </h1>
+    <p class="mt-4 text-lg text-gray-500 max-w-2xl leading-relaxed">
+      Dein Portal für Mathematik, Maschinenkunde und Materialwissen.
+    </p>
+  </section>
+
+  <!-- Instant Search -->
+  <section class="max-w-6xl mx-auto px-6 pb-8 flex justify-center">
+    <div class="relative w-full max-w-md" id="search-wrapper">
+      <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-orange-400 pointer-events-none z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+      </svg>
+      <input
+        id="topic-search"
+        type="text"
+        autocomplete="off"
+        placeholder="Thema, Lektion oder Fachbegriff suchen..."
+        class="w-full pl-10 pr-4 py-2.5 text-sm bg-white border border-gray-200/60 rounded-xl shadow-sm text-gray-900 placeholder-gray-400 outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100 transition-all relative z-10"
+      />
+      <div id="search-panel" class="hidden absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl border border-gray-200/60 shadow-xl overflow-hidden z-50 max-h-[28rem] overflow-y-auto"></div>
+    </div>
+  </section>
+
+  <!-- Tags Grid -->
+  <section class="max-w-6xl mx-auto px-6 pb-24">
+    {visibleTags.length > 0 ? (
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {visibleTags.map((tag, index) => (
+          <a
+            href={`/thema/${tag.slug}`}
+            class="group relative block rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 aspect-[4/3]"
+          >
+            {tag.feature_image ? (
+              <img
+                src={tag.feature_image}
+                alt={tag.name}
+                class="absolute inset-0 w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 ease-out"
+              />
+            ) : (
+              <div class={`absolute inset-0 bg-gradient-to-br ${gradients[index % gradients.length]} transform group-hover:scale-105 transition-transform duration-700 ease-out`}>
+                <div class="absolute top-6 right-6" set:html={icons[index % icons.length]} />
+                <div class="absolute top-20 right-20 opacity-50" set:html={icons[(index + 2) % icons.length]} />
+                <div class="absolute bottom-24 right-8 opacity-30" set:html={icons[(index + 4) % icons.length]} />
+              </div>
+            )}
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+            <div class="absolute inset-0 flex flex-col justify-end p-7">
+              <h2 class="text-2xl font-bold text-white leading-snug mb-2 drop-shadow-sm">
+                {tag.name}
+              </h2>
+              {tag.description && (
+                <p class="text-sm text-white/70 leading-relaxed line-clamp-2 mb-4">
+                  {tag.description}
+                </p>
+              )}
+              <div class="flex items-center justify-between">
+                <span class="text-sm text-white/60 font-medium">
+                  {tag.count.posts} {tag.count.posts === 1 ? "Lektion" : "Lektionen"}
+                </span>
+                <span class="flex items-center gap-1 text-white/0 group-hover:text-white/80 transition-all duration-300 text-sm font-medium">
+                  Entdecken
+                  <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                  </svg>
+                </span>
+              </div>
+            </div>
+          </a>
+        ))}
+      </div>
+    ) : (
+      <div class="text-center py-20">
+        <div class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
+          <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+          </svg>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-400 mb-2">Noch keine Themen vorhanden</h3>
+        <p class="text-sm text-gray-400">Erstelle Tags in Ghost und weise sie Beiträgen zu, um Themengebiete anzuzeigen.</p>
+      </div>
+    )}
+  </section>
+
+  <!-- Search index data -->
+  <script define:vars={{ searchIndex }}>
+    window.__searchIndex = searchIndex;
+  </script>
+
+  <!-- Instant search logic -->
+  <script>
+    const idx = window.__searchIndex;
+    const input = document.getElementById("topic-search");
+    const panel = document.getElementById("search-panel");
+    const wrapper = document.getElementById("search-wrapper");
+    let activeIdx = -1;
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    function highlight(text, q) {
+      if (!q) return escapeHtml(text);
+      const escaped = escapeHtml(text);
+      const regex = new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "gi");
+      return escaped.replace(regex, `<span class="text-orange-500 font-semibold">$1</span>`);
+    }
+
+    function render(q) {
+      const query = q.toLowerCase();
+      const topics = idx.topics.filter(
+        (t) => t.name.toLowerCase().includes(query) || t.description.toLowerCase().includes(query)
+      );
+      const posts = idx.posts.filter(
+        (p) => p.title.toLowerCase().includes(query) || p.tag.toLowerCase().includes(query)
+      );
+      const glossar = idx.glossar.filter((g) => g.title.toLowerCase().includes(query));
+
+      if (!topics.length && !posts.length && !glossar.length) {
+        panel.innerHTML = `
+          <div class="px-5 py-8 text-center">
+            <p class="text-sm text-gray-400">Keine Ergebnisse f\u00fcr \u201e${escapeHtml(q)}\u201c</p>
+          </div>`;
+        panel.classList.remove("hidden");
+        return;
+      }
+
+      let html = "";
+
+      // Topics
+      if (topics.length) {
+        html += `<div class="px-4 pt-3 pb-1"><span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Themengebiete</span></div>`;
+        topics.forEach((t) => {
+          html += `
+            <a href="/thema/${t.slug}" class="search-item flex items-center gap-3 px-4 py-2.5 hover:bg-orange-50 transition-colors cursor-pointer">
+              <div class="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <svg class="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                </svg>
+              </div>
+              <div class="min-w-0">
+                <div class="text-sm text-gray-900 leading-snug">${highlight(t.name, q)}</div>
+                ${t.description ? `<div class="text-xs text-gray-400 truncate mt-0.5">${escapeHtml(t.description).substring(0, 60)}</div>` : ""}
+              </div>
+            </a>`;
+        });
+      }
+
+      // Lessons
+      if (posts.length) {
+        html += `<div class="px-4 pt-3 pb-1 ${topics.length ? "border-t border-gray-100" : ""}"><span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Lektionen</span></div>`;
+        posts.slice(0, 6).forEach((p) => {
+          html += `
+            <a href="/post/${p.slug}" class="search-item flex items-center gap-3 px-4 py-2.5 hover:bg-orange-50 transition-colors cursor-pointer">
+              <div class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              <div class="min-w-0">
+                <div class="text-sm text-gray-900 leading-snug">${highlight(p.title, q)}</div>
+                ${p.tag ? `<div class="text-xs text-gray-400 mt-0.5">${escapeHtml(p.tag)}</div>` : ""}
+              </div>
+            </a>`;
+        });
+        if (posts.length > 6) {
+          html += `<div class="px-4 py-2 text-xs text-gray-400 text-center">und ${posts.length - 6} weitere\u2026</div>`;
+        }
+      }
+
+      // Glossar
+      if (glossar.length) {
+        html += `<div class="px-4 pt-3 pb-1 ${topics.length || posts.length ? "border-t border-gray-100" : ""}"><span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Glossar</span></div>`;
+        glossar.slice(0, 6).forEach((g) => {
+          html += `
+            <button data-glossar-slug="${g.slug}" class="search-item flex items-center gap-3 px-4 py-2.5 hover:bg-orange-50 transition-colors cursor-pointer w-full text-left">
+              <div class="w-8 h-8 bg-orange-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                <svg class="w-4 h-4 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+              </div>
+              <div class="min-w-0">
+                <div class="text-sm text-gray-900 leading-snug">${highlight(g.title, q)}</div>
+                <div class="text-xs text-orange-400 mt-0.5">Im Glossar nachschlagen</div>
+              </div>
+            </button>`;
+        });
+      }
+
+      html += `<div class="h-1.5"></div>`;
+      panel.innerHTML = html;
+      panel.classList.remove("hidden");
+      activeIdx = -1;
+    }
+
+    function getItems() {
+      return panel.querySelectorAll(".search-item");
+    }
+
+    function updateActive() {
+      const items = getItems();
+      items.forEach((el, i) => {
+        el.classList.toggle("bg-orange-50", i === activeIdx);
+      });
+      if (activeIdx >= 0 && items[activeIdx]) {
+        items[activeIdx].scrollIntoView({ block: "nearest" });
+      }
+    }
+
+    function activateItem() {
+      const items = getItems();
+      if (activeIdx < 0 || !items[activeIdx]) return;
+      const item = items[activeIdx];
+      const glossarSlug = item.dataset.glossarSlug;
+      if (glossarSlug) {
+        panel.classList.add("hidden");
+        openGlossaryTerm(glossarSlug);
+      } else if (item.href) {
+        window.location.href = item.href;
+      }
+    }
+
+    input.addEventListener("input", () => {
+      const q = input.value.trim();
+      if (!q) { panel.classList.add("hidden"); return; }
+      render(q);
+    });
+
+    input.addEventListener("focus", () => {
+      const q = input.value.trim();
+      if (q) render(q);
+    });
+
+    input.addEventListener("keydown", (e) => {
+      const items = getItems();
+      if (!items.length || panel.classList.contains("hidden")) return;
+
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        activeIdx = (activeIdx + 1) % items.length;
+        updateActive();
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        activeIdx = activeIdx <= 0 ? items.length - 1 : activeIdx - 1;
+        updateActive();
+      } else if (e.key === "Enter") {
+        e.preventDefault();
+        activateItem();
+      } else if (e.key === "Escape") {
+        panel.classList.add("hidden");
+        input.blur();
+      }
+    });
+
+    // Click delegation for glossar items
+    panel.addEventListener("click", (e) => {
+      const glossarBtn = e.target.closest("[data-glossar-slug]");
+      if (glossarBtn) {
+        e.preventDefault();
+        panel.classList.add("hidden");
+        openGlossaryTerm(glossarBtn.dataset.glossarSlug);
+      }
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!wrapper.contains(e.target)) {
+        panel.classList.add("hidden");
+      }
+    });
+  </script>
+</Layout>

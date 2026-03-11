@@ -1,0 +1,13 @@
+services:
+  packcampus:
+    build: .
+    ports:
+      - "4321:4321"
+    volumes:
+      - feedback-data:/app/data
+    env_file:
+      - .env
+    restart: unless-stopped
+
+volumes:
+  feedback-data:
