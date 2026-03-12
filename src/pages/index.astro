@@ -63,35 +63,43 @@ const icons = [
 <Layout title="PackCampus - Duale Ausbildung">
   <!-- Header -->
   <header class="bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50">
-    <div class="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
-      <a href="/" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
-        <div class="w-9 h-9 bg-orange-500 rounded-lg flex items-center justify-center">
-          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-4 sm:py-5 flex items-center justify-between">
+      <a href="/" class="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
+        <div class="w-8 h-8 sm:w-9 sm:h-9 bg-orange-500 rounded-lg flex items-center justify-center">
+          <svg class="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
           </svg>
         </div>
-        <span class="text-lg font-semibold tracking-tight">PackCampus</span>
+        <span class="text-base sm:text-lg font-semibold tracking-tight">PackCampus</span>
       </a>
-      <nav class="flex items-center gap-6">
+      <nav class="hidden sm:flex items-center gap-6">
         <button onclick="toggleGlossary(true)" class="text-sm text-gray-400 hover:text-orange-500 transition-colors font-medium cursor-pointer">Glossar</button>
         <span class="text-sm text-gray-400 font-medium">Duale Ausbildung</span>
       </nav>
+      <button onclick="toggleMobileNav()" class="sm:hidden w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors text-gray-500" aria-label="Menü">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+    </div>
+    <div id="mobileNav" class="hidden sm:hidden border-t border-gray-100 bg-white/95 backdrop-blur-md px-4 py-3 space-y-2">
+      <button onclick="toggleGlossary(true); toggleMobileNav()" class="block w-full text-left text-sm text-gray-600 hover:text-orange-500 font-medium py-2 px-2 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">Glossar</button>
     </div>
   </header>
 
   <!-- Hero -->
-  <section class="max-w-6xl mx-auto px-6 pt-16 pb-12">
-    <p class="text-sm font-medium text-orange-500 tracking-wide uppercase mb-3">Duale Ausbildung</p>
-    <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight text-gray-900 leading-tight">
+  <section class="max-w-6xl mx-auto px-4 sm:px-6 pt-10 sm:pt-16 pb-8 sm:pb-12">
+    <p class="text-xs sm:text-sm font-medium text-orange-500 tracking-wide uppercase mb-2 sm:mb-3">Duale Ausbildung</p>
+    <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-gray-900 leading-tight">
       Wissen für angehende Packmitteltechnologen
     </h1>
-    <p class="mt-4 text-lg text-gray-500 max-w-2xl leading-relaxed">
+    <p class="mt-3 sm:mt-4 text-base sm:text-lg text-gray-500 max-w-2xl leading-relaxed">
       Dein Portal für Mathematik, Maschinenkunde und Materialwissen.
     </p>
   </section>
 
   <!-- Instant Search -->
-  <section class="max-w-6xl mx-auto px-6 pb-8 flex justify-center">
+  <section class="max-w-6xl mx-auto px-4 sm:px-6 pb-6 sm:pb-8 flex justify-center">
     <div class="relative w-full max-w-md" id="search-wrapper">
       <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-orange-400 pointer-events-none z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -108,7 +116,7 @@ const icons = [
   </section>
 
   <!-- Tags Grid -->
-  <section class="max-w-6xl mx-auto px-6 pb-24">
+  <section class="max-w-6xl mx-auto px-4 sm:px-6 pb-16 sm:pb-24">
     {visibleTags.length > 0 ? (
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {visibleTags.map((tag, index) => (

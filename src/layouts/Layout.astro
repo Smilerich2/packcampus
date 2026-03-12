@@ -47,15 +47,15 @@ const glossarLetters = Object.keys(glossarGrouped).sort((a, b) => a.localeCompar
 
     <!-- Footer -->
     <footer class="border-t border-gray-100 bg-white">
-      <div class="max-w-6xl mx-auto px-6 py-8 text-center">
-        <p class="text-sm text-gray-400">&copy; 2026 PackCampus &middot; Alle Rechte vorbehalten</p>
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8 text-center">
+        <p class="text-xs sm:text-sm text-gray-400">&copy; 2026 PackCampus &middot; Alle Rechte vorbehalten</p>
       </div>
     </footer>
 
     <!-- Feedback Button -->
     <button
       onclick="toggleFeedback(true)"
-      class="fixed bottom-6 right-6 z-50 w-12 h-12 bg-orange-500 hover:bg-orange-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center group"
+      class="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 w-11 h-11 sm:w-12 sm:h-12 bg-orange-500 hover:bg-orange-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center group"
       aria-label="Feedback geben"
     >
       <svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -67,9 +67,9 @@ const glossarLetters = Object.keys(glossarGrouped).sort((a, b) => a.localeCompar
     <div id="feedbackBackdrop" onclick="toggleFeedback(false)" class="fixed inset-0 bg-black/40 z-[80] opacity-0 pointer-events-none transition-opacity duration-300"></div>
 
     <!-- Feedback Modal -->
-    <div id="feedbackModal" class="fixed inset-0 z-[90] flex items-center justify-center p-4 pointer-events-none">
-      <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md transform scale-95 opacity-0 transition-all duration-300 pointer-events-auto" id="feedbackCard" style="display:none">
-        <div class="flex items-center justify-between px-6 py-5 border-b border-gray-100">
+    <div id="feedbackModal" class="fixed inset-0 z-[90] flex items-end sm:items-center justify-center sm:p-4 pointer-events-none">
+      <div class="bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl w-full sm:max-w-md transform translate-y-full sm:translate-y-0 sm:scale-95 opacity-0 transition-all duration-300 pointer-events-auto max-h-[90vh] overflow-y-auto" id="feedbackCard" style="display:none">
+        <div class="flex items-center justify-between px-5 sm:px-6 py-4 sm:py-5 border-b border-gray-100">
           <h2 class="text-lg font-semibold tracking-tight">Feedback geben</h2>
           <button onclick="toggleFeedback(false)" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -78,7 +78,7 @@ const glossarLetters = Object.keys(glossarGrouped).sort((a, b) => a.localeCompar
           </button>
         </div>
 
-        <form id="feedbackForm" class="p-6 space-y-4">
+        <form id="feedbackForm" class="p-4 sm:p-6 space-y-3 sm:space-y-4">
           <!-- Type selector -->
           <div class="flex gap-2" id="feedbackTypes">
             <button type="button" data-type="lob" class="feedback-type-btn flex-1 py-2.5 px-3 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:border-orange-300 hover:text-orange-600 transition-all cursor-pointer">
@@ -242,22 +242,38 @@ const glossarLetters = Object.keys(glossarGrouped).sort((a, b) => a.localeCompar
 
     <!-- Feedback toggle (inline for immediate availability) -->
     <script is:inline>
+      function toggleMobileNav() {
+        var nav = document.getElementById('mobileNav');
+        if (nav) nav.classList.toggle('hidden');
+      }
+
       function toggleFeedback(isOpen) {
         var backdrop = document.getElementById('feedbackBackdrop');
         var card = document.getElementById('feedbackCard');
+        var isMobile = window.innerWidth < 640;
         if (isOpen) {
           card.style.display = '';
           requestAnimationFrame(function() {
             backdrop.classList.remove('opacity-0', 'pointer-events-none');
             backdrop.classList.add('opacity-100');
-            card.classList.remove('scale-95', 'opacity-0');
-            card.classList.add('scale-100', 'opacity-100');
+            if (isMobile) {
+              card.classList.remove('translate-y-full', 'opacity-0');
+              card.classList.add('translate-y-0', 'opacity-100');
+            } else {
+              card.classList.remove('scale-95', 'opacity-0');
+              card.classList.add('scale-100', 'opacity-100');
+            }
           });
         } else {
           backdrop.classList.add('opacity-0', 'pointer-events-none');
           backdrop.classList.remove('opacity-100');
-          card.classList.add('scale-95', 'opacity-0');
-          card.classList.remove('scale-100', 'opacity-100');
+          if (isMobile) {
+            card.classList.add('translate-y-full', 'opacity-0');
+            card.classList.remove('translate-y-0', 'opacity-100');
+          } else {
+            card.classList.add('scale-95', 'opacity-0');
+            card.classList.remove('scale-100', 'opacity-100');
+          }
           setTimeout(function() { card.style.display = 'none'; }, 300);
         }
       }

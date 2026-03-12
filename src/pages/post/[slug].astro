@@ -16,16 +16,16 @@ const post = await ghost.posts.read({ slug }, { include: "tags,authors" });
 <Layout title={post.title}>
   <!-- Header -->
   <header class="bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50">
-    <div class="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
-      <a href="/" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
-        <div class="w-9 h-9 bg-orange-500 rounded-lg flex items-center justify-center">
-          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-4 sm:py-5 flex items-center justify-between">
+      <a href="/" class="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
+        <div class="w-8 h-8 sm:w-9 sm:h-9 bg-orange-500 rounded-lg flex items-center justify-center">
+          <svg class="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
           </svg>
         </div>
-        <span class="text-lg font-semibold tracking-tight">PackCampus</span>
+        <span class="text-base sm:text-lg font-semibold tracking-tight">PackCampus</span>
       </a>
-      <nav class="flex items-center gap-6">
+      <nav class="hidden sm:flex items-center gap-6">
         <button onclick="toggleGlossary(true)" class="text-sm text-gray-400 hover:text-orange-500 transition-colors font-medium cursor-pointer">Glossar</button>
         {post.primary_tag ? (
           <a href={`/thema/${post.primary_tag.slug}`} class="flex items-center gap-2 text-sm text-gray-400 hover:text-orange-500 transition-colors font-medium">
@@ -43,6 +43,19 @@ const post = await ghost.posts.read({ slug }, { include: "tags,authors" });
           </a>
         )}
       </nav>
+      <button onclick="toggleMobileNav()" class="sm:hidden w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors text-gray-500" aria-label="Menü">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+    </div>
+    <div id="mobileNav" class="hidden sm:hidden border-t border-gray-100 bg-white/95 backdrop-blur-md px-4 py-3 space-y-1">
+      <button onclick="toggleGlossary(true); toggleMobileNav()" class="block w-full text-left text-sm text-gray-600 hover:text-orange-500 font-medium py-2 px-2 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">Glossar</button>
+      {post.primary_tag ? (
+        <a href={`/thema/${post.primary_tag.slug}`} class="block text-sm text-gray-600 hover:text-orange-500 font-medium py-2 px-2 rounded-lg hover:bg-gray-50 transition-colors">{post.primary_tag.name}</a>
+      ) : (
+        <a href="/" class="block text-sm text-gray-600 hover:text-orange-500 font-medium py-2 px-2 rounded-lg hover:bg-gray-50 transition-colors">Alle Themen</a>
+      )}
     </div>
   </header>
 
@@ -58,9 +71,9 @@ const post = await ghost.posts.read({ slug }, { include: "tags,authors" });
       </div>
     )}
 
-    <article class={`relative z-10 max-w-3xl mx-auto px-6 pb-24 ${post.feature_image ? 'pt-48 md:pt-64 lg:pt-80' : 'pt-16'}`}>
-      <div class={post.feature_image ? 'bg-white/95 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-200/60 p-8 md:p-10' : ''}>
-        <div class="flex items-center gap-3 text-sm text-gray-400 mb-6">
+    <article class={`relative z-10 max-w-3xl mx-auto px-4 sm:px-6 pb-16 sm:pb-24 ${post.feature_image ? 'pt-32 sm:pt-48 md:pt-64 lg:pt-80' : 'pt-10 sm:pt-16'}`}>
+      <div class={post.feature_image ? 'bg-white/95 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-200/60 p-5 sm:p-8 md:p-10' : ''}>
+        <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-gray-400 mb-4 sm:mb-6">
           {post.primary_tag && (
             <a href={`/thema/${post.primary_tag.slug}`} class="font-medium text-orange-500 hover:text-orange-600 transition-colors">
               {post.primary_tag.name}
@@ -82,7 +95,7 @@ const post = await ghost.posts.read({ slug }, { include: "tags,authors" });
           <span>{post.reading_time} Min. Lesezeit</span>
         </div>
 
-        <h1 class="text-3xl md:text-4xl font-bold tracking-tight text-gray-900 leading-tight">
+        <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-gray-900 leading-tight">
           {post.title}
         </h1>
 

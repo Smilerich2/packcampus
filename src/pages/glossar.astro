@@ -29,16 +29,16 @@ const letters = Object.keys(grouped).sort((a, b) => a.localeCompare(b, "de"));
 <Layout title="Glossar">
   <!-- Header -->
   <header class="bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50">
-    <div class="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
-      <a href="/" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
-        <div class="w-9 h-9 bg-orange-500 rounded-lg flex items-center justify-center">
-          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-4 sm:py-5 flex items-center justify-between">
+      <a href="/" class="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
+        <div class="w-8 h-8 sm:w-9 sm:h-9 bg-orange-500 rounded-lg flex items-center justify-center">
+          <svg class="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
           </svg>
         </div>
-        <span class="text-lg font-semibold tracking-tight">PackCampus</span>
+        <span class="text-base sm:text-lg font-semibold tracking-tight">PackCampus</span>
       </a>
-      <nav class="flex items-center gap-6">
+      <nav class="hidden sm:flex items-center gap-6">
         <button onclick="toggleGlossary(true)" class="text-sm text-orange-500 font-medium cursor-pointer">Glossar</button>
         <a href="/" class="flex items-center gap-2 text-sm text-gray-400 hover:text-orange-500 transition-colors font-medium">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -47,22 +47,31 @@ const letters = Object.keys(grouped).sort((a, b) => a.localeCompare(b, "de"));
           Alle Themen
         </a>
       </nav>
+      <button onclick="toggleMobileNav()" class="sm:hidden w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors text-gray-500" aria-label="Menü">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+    </div>
+    <div id="mobileNav" class="hidden sm:hidden border-t border-gray-100 bg-white/95 backdrop-blur-md px-4 py-3 space-y-1">
+      <button onclick="toggleGlossary(true); toggleMobileNav()" class="block w-full text-left text-sm text-orange-500 font-medium py-2 px-2 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">Glossar</button>
+      <a href="/" class="block text-sm text-gray-600 hover:text-orange-500 font-medium py-2 px-2 rounded-lg hover:bg-gray-50 transition-colors">Alle Themen</a>
     </div>
   </header>
 
   <!-- Hero -->
-  <section class="max-w-6xl mx-auto px-6 pt-16 pb-10">
-    <p class="text-sm font-medium text-orange-500 tracking-wide uppercase mb-3">Nachschlagewerk</p>
-    <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight text-gray-900 leading-tight">
+  <section class="max-w-6xl mx-auto px-4 sm:px-6 pt-10 sm:pt-16 pb-6 sm:pb-10">
+    <p class="text-xs sm:text-sm font-medium text-orange-500 tracking-wide uppercase mb-2 sm:mb-3">Nachschlagewerk</p>
+    <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-gray-900 leading-tight">
       Glossar
     </h1>
-    <p class="mt-4 text-lg text-gray-500 max-w-2xl leading-relaxed">
+    <p class="mt-3 sm:mt-4 text-base sm:text-lg text-gray-500 max-w-2xl leading-relaxed">
       Wichtige Fachbegriffe aus der Welt der Packmitteltechnologie — alphabetisch sortiert und verständlich erklärt.
     </p>
   </section>
 
   <!-- Search -->
-  <section class="max-w-6xl mx-auto px-6 pb-8">
+  <section class="max-w-6xl mx-auto px-4 sm:px-6 pb-6 sm:pb-8">
     <div class="relative max-w-xl">
       <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-orange-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -78,7 +87,7 @@ const letters = Object.keys(grouped).sort((a, b) => a.localeCompare(b, "de"));
   </section>
 
   <!-- No results -->
-  <div id="glossar-no-results" class="hidden max-w-6xl mx-auto px-6 pb-12">
+  <div id="glossar-no-results" class="hidden max-w-6xl mx-auto px-4 sm:px-6 pb-8 sm:pb-12">
     <div class="text-center py-16">
       <div class="w-14 h-14 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-5">
         <svg class="w-7 h-7 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -92,12 +101,12 @@ const letters = Object.keys(grouped).sort((a, b) => a.localeCompare(b, "de"));
 
   <!-- Letter navigation -->
   {letters.length > 0 && (
-    <section id="letter-nav" class="max-w-6xl mx-auto px-6 pb-8">
+    <section id="letter-nav" class="max-w-6xl mx-auto px-4 sm:px-6 pb-6 sm:pb-8">
       <div class="flex flex-wrap gap-2">
         {letters.map((letter) => (
           <a
             href={`#letter-${letter}`}
-            class="w-10 h-10 flex items-center justify-center rounded-lg text-sm font-semibold bg-white border border-gray-200/60 text-gray-600 hover:bg-orange-500 hover:text-white hover:border-orange-500 transition-all duration-200 shadow-sm"
+            class="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-lg text-xs sm:text-sm font-semibold bg-white border border-gray-200/60 text-gray-600 hover:bg-orange-500 hover:text-white hover:border-orange-500 transition-all duration-200 shadow-sm"
           >
             {letter}
           </a>
@@ -107,7 +116,7 @@ const letters = Object.keys(grouped).sort((a, b) => a.localeCompare(b, "de"));
   )}
 
   <!-- Glossar entries -->
-  <section id="glossar-entries" class="max-w-6xl mx-auto px-6 pb-24">
+  <section id="glossar-entries" class="max-w-6xl mx-auto px-4 sm:px-6 pb-16 sm:pb-24">
     {letters.length > 0 ? (
       <div class="space-y-12">
         {letters.map((letter) => (
