@@ -1,6 +1,6 @@
 import { defineMiddleware } from "astro:middleware";
 
-const PUBLIC_PATHS = ["/api/site-login", "/api/feedback"];
+const PUBLIC_PATHS = ["/api/"];
 
 export const onRequest = defineMiddleware(({ url, cookies }, next) => {
   // Let API routes and static assets through
