@@ -7,8 +7,7 @@ services:
         PUBLIC_GHOST_CONTENT_API_KEY: ${PUBLIC_GHOST_CONTENT_API_KEY}
         ADMIN_PASSWORD: ${ADMIN_PASSWORD}
         SITE_PASSWORD: ${SITE_PASSWORD}
-    ports:
-      - "4321:4321"
+    network_mode: host
     volumes:
       - feedback-data:/app/data
     env_file:
