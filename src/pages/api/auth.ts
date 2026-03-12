@@ -3,7 +3,7 @@ import type { APIRoute } from "astro";
 export const POST: APIRoute = async ({ request }) => {
   try {
     const { password } = (await request.json()) as { password?: string };
-    const correct = import.meta.env.ADMIN_PASSWORD || "";
+    const correct = process.env.ADMIN_PASSWORD || "";
 
     if (!password || password !== correct) {
       return new Response(

@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
 
-const SITE_PASSWORD = import.meta.env.SITE_PASSWORD || "lernen2024";
+const SITE_PASSWORD = process.env.SITE_PASSWORD || "lernen2024";
 
 export const POST: APIRoute = async ({ request, cookies }) => {
   const form = await request.formData();

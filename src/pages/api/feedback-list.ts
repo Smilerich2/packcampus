@@ -7,7 +7,7 @@ const FEEDBACK_FILE = join(process.cwd(), "data", "feedback.json");
 export const POST: APIRoute = async ({ request }) => {
   try {
     const { token } = (await request.json()) as { token?: string };
-    const correct = import.meta.env.ADMIN_PASSWORD || "";
+    const correct = process.env.ADMIN_PASSWORD || "";
 
     if (!token || token !== correct) {
       return new Response(
