@@ -1,6 +1,12 @@
 services:
   packcampus:
-    build: .
+    build:
+      context: .
+      args:
+        PUBLIC_GHOST_URL: ${PUBLIC_GHOST_URL}
+        PUBLIC_GHOST_CONTENT_API_KEY: ${PUBLIC_GHOST_CONTENT_API_KEY}
+        ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+        SITE_PASSWORD: ${SITE_PASSWORD}
     ports:
       - "4321:4321"
     volumes:
