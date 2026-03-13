@@ -589,7 +589,7 @@ const glossarLetters = Object.keys(glossarGrouped).sort((a, b) => a.localeCompar
 
           if (type.special) {
             // Info: dark design
-            callout.className = "bg-gray-900 p-6 rounded-2xl flex items-start gap-4 shadow-lg shadow-gray-900/20 my-6";
+            callout.className = "not-prose bg-gray-900 p-6 rounded-2xl flex items-start gap-4 shadow-lg shadow-gray-900/20 my-6";
             callout.innerHTML =
               '<div class="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center shrink-0 mt-1">' +
                 '<i data-lucide="info" class="w-5 h-5 text-white"></i>' +
@@ -600,7 +600,7 @@ const glossarLetters = Object.keys(glossarGrouped).sort((a, b) => a.localeCompar
               '</div>';
           } else {
             // Standard design
-            callout.className = type.bg + " border " + type.border + " rounded-2xl p-6 relative overflow-hidden my-6";
+            callout.className = "not-prose " + type.bg + " border " + type.border + " rounded-2xl p-6 relative overflow-hidden my-6";
             callout.innerHTML =
               '<div class="absolute top-0 left-0 w-1.5 h-full ' + type.bar + '"></div>' +
               '<div class="flex gap-4">' +
