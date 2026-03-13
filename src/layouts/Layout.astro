@@ -512,77 +512,119 @@ const glossarLetters = Object.keys(glossarGrouped).sort((a, b) => a.localeCompar
       });
     </script>
 
-    <!-- Blockquote callout redesign -->
-    <script>
-      document.addEventListener("DOMContentLoaded", () => {
-        const calloutTypes = [
-          {
-            match: /💡\s*Merke/,
-            emoji: "💡",
-            title: "Merke",
-            bg: "bg-orange-50", border: "border-orange-100", bar: "bg-orange-500",
-            iconColor: "text-orange-500", titleColor: "text-orange-900", textColor: "text-orange-800",
-            icon: `<svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" /></svg>`,
-          },
-          {
-            match: /ℹ️\s*Info/,
-            emoji: "ℹ️",
-            title: "Info",
-            bg: "bg-gray-50", border: "border-gray-200", bar: "bg-gray-700",
-            iconColor: "text-gray-600", titleColor: "text-gray-900", textColor: "text-gray-700",
-            icon: `<svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" /></svg>`,
-          },
-          {
-            match: /✅\s*Ergebnis/,
-            emoji: "✅",
-            title: "Ergebnis",
-            bg: "bg-emerald-50", border: "border-emerald-100", bar: "bg-emerald-500",
-            iconColor: "text-emerald-500", titleColor: "text-emerald-900", textColor: "text-emerald-800",
-            icon: `<svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`,
-          },
-        ];
-
-        document.querySelectorAll("blockquote").forEach((bq) => {
-          const text = bq.textContent || "";
-          const type = calloutTypes.find((t) => t.match.test(text));
-          if (!type) return;
-
-          // Extract content: remove the emoji + keyword from the first <strong>
-          const strong = bq.querySelector("strong");
-          if (strong) {
-            const cleaned = strong.innerHTML
-              .replace(type.emoji, "")
-              .replace(type.title, "")
-              .trim();
-            if (cleaned) {
-              strong.innerHTML = cleaned;
-            } else {
-              strong.remove();
+    <!-- Blockquote callout redesign (runs before KaTeX) -->
+    <script is:inline>
+      (function() {
+        function transformCallouts() {
+          var calloutTypes = [
+            {
+              match: /💡\s*Merke/,
+              emoji: "💡",
+              title: "Merke",
+              wrapper: "bg-orange-50 border border-orange-100 rounded-2xl p-6 relative overflow-hidden my-6",
+              bar: "bg-orange-500",
+              iconColor: "text-orange-500",
+              titleColor: "text-orange-900",
+              textColor: "text-orange-800",
+              icon: '<svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" /></svg>'
+            },
+            {
+              match: /ℹ️\s*Info/,
+              emoji: "ℹ️",
+              title: "Info",
+              wrapper: "bg-gray-900 rounded-2xl p-6 relative overflow-hidden my-6 shadow-lg shadow-gray-900/20",
+              bar: "bg-white/20",
+              iconColor: "text-white/80",
+              titleColor: "text-white",
+              textColor: "text-white/80",
+              icon: '<svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" /></svg>'
+            },
+            {
+              match: /✅\s*Ergebnis/,
+              emoji: "✅",
+              title: "Ergebnis",
+              wrapper: "bg-green-50 border border-green-100 rounded-2xl p-6 relative overflow-hidden my-6",
+              bar: "bg-green-500",
+              iconColor: "text-green-500",
+              titleColor: "text-green-900",
+              textColor: "text-green-800",
+              icon: '<svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>'
             }
+          ];
+
+          var blockquotes = document.querySelectorAll("blockquote");
+          for (var i = 0; i < blockquotes.length; i++) {
+            var bq = blockquotes[i];
+            var text = bq.textContent || "";
+            var type = null;
+            for (var j = 0; j < calloutTypes.length; j++) {
+              if (calloutTypes[j].match.test(text)) { type = calloutTypes[j]; break; }
+            }
+            if (!type) continue;
+
+            // Clone children to preserve DOM nodes (important for KaTeX)
+            var contentContainer = document.createElement("div");
+            while (bq.firstChild) {
+              contentContainer.appendChild(bq.firstChild);
+            }
+
+            // Remove emoji + keyword from the first <strong>
+            var strong = contentContainer.querySelector("strong");
+            if (strong) {
+              var cleaned = strong.textContent
+                .replace(type.emoji, "")
+                .replace(type.title, "")
+                .trim();
+              if (cleaned) {
+                strong.textContent = cleaned;
+              } else {
+                strong.parentNode.removeChild(strong);
+              }
+            }
+
+            // Remove stray emoji text nodes
+            var walker = document.createTreeWalker(contentContainer, NodeFilter.SHOW_TEXT);
+            var node;
+            while (node = walker.nextNode()) {
+              if (node.nodeValue.indexOf(type.emoji) !== -1) {
+                node.nodeValue = node.nodeValue.replace(type.emoji, "").trim();
+                break;
+              }
+            }
+
+            var callout = document.createElement("div");
+            callout.className = type.wrapper;
+            callout.innerHTML =
+              '<div class="absolute top-0 left-0 w-1.5 h-full ' + type.bar + '"></div>' +
+              '<div class="flex gap-4">' +
+                '<div class="mt-0.5 shrink-0 ' + type.iconColor + '">' + type.icon + '</div>' +
+                '<div class="w-full">' +
+                  '<h4 class="font-bold ' + type.titleColor + ' mb-2">' + type.title + '</h4>' +
+                  '<div class="' + type.textColor + ' text-sm leading-relaxed overflow-x-auto callout-content"></div>' +
+                '</div>' +
+              '</div>';
+
+            // Append cloned content nodes into callout-content div
+            var target = callout.querySelector(".callout-content");
+            while (contentContainer.firstChild) {
+              target.appendChild(contentContainer.firstChild);
+            }
+
+            bq.parentNode.replaceChild(callout, bq);
           }
 
-          // Get remaining inner HTML
-          const content = bq.innerHTML
-            .replace(/^\s*<p>\s*/, "<p>")
-            .replace(type.emoji, "")
-            .trim();
+          // Render Lucide icons if available
+          if (typeof lucide !== "undefined" && lucide.createIcons) {
+            lucide.createIcons();
+          }
+        }
 
-          const callout = document.createElement("div");
-          callout.className = `${type.bg} border ${type.border} rounded-2xl p-6 relative overflow-hidden my-6`;
-          callout.innerHTML = `
-            <div class="absolute top-0 left-0 w-1.5 h-full ${type.bar}"></div>
-            <div class="flex gap-4">
-              <div class="mt-0.5 shrink-0 ${type.iconColor}">${type.icon}</div>
-              <div class="w-full">
-                <h4 class="font-bold ${type.titleColor} mb-2">${type.title}</h4>
-                <div class="${type.textColor} text-sm leading-relaxed overflow-x-auto callout-content">${content}</div>
-              </div>
-            </div>
-          `;
-
-          bq.replaceWith(callout);
-        });
-      });
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", transformCallouts);
+        } else {
+          transformCallouts();
+        }
+      })();
     </script>
   </body>
 </html>
