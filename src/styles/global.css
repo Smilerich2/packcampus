@@ -17,6 +17,28 @@
   white-space: nowrap;
 }
 
+/* ── Callout Whitespace Fix ── */
+.callout-content p {
+  margin: 0.25rem 0 !important;
+}
+
+.callout-content p:first-child {
+  margin-top: 0 !important;
+}
+
+.callout-content p:last-child {
+  margin-bottom: 0 !important;
+}
+
+.callout-content .katex-display {
+  margin: 0.5rem 0 !important;
+}
+
+.callout-content p:empty,
+.callout-content br {
+  display: none !important;
+}
+
 /* ── Ghost Card Base ── */
 .kg-card {
   margin: 2rem 0;
