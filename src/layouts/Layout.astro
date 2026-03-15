@@ -210,7 +210,6 @@ const glossarLetters = Object.keys(glossarGrouped).sort((a, b) => a.localeCompar
                     class="glossar-panel-entry group px-2"
                     data-slug={post.slug}
                     data-title={post.title.toLowerCase()}
-                    data-excerpt={(post.excerpt || "").toLowerCase()}
                   >
                     <summary class="flex items-center justify-between py-3 px-2 cursor-pointer rounded-xl hover:bg-gray-50 transition-colors select-none group-open:bg-orange-50/50 group-open:text-orange-600">
                       <span class="font-bold text-[15px] text-gray-800 group-open:text-orange-700 transition-colors">{post.title}</span>
@@ -455,8 +454,7 @@ const glossarLetters = Object.keys(glossarGrouped).sort((a, b) => a.localeCompar
 
           panelEntries.forEach((entry) => {
             const title = entry.dataset.title || "";
-            const excerpt = entry.dataset.excerpt || "";
-            const match = !q || title.includes(q) || excerpt.includes(q);
+            const match = !q || title.includes(q);
             entry.style.display = match ? "" : "none";
             if (match) total++;
           });
