@@ -1,0 +1,348 @@
+---
+import Layout from "../../layouts/Layout.astro";
+---
+
+<Layout title="Medien-Manager">
+  <header class="bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-4 sm:py-5 flex items-center justify-between">
+      <a href="/" class="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
+        <div class="w-8 h-8 sm:w-9 sm:h-9 bg-orange-500 rounded-lg flex items-center justify-center">
+          <svg class="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+          </svg>
+        </div>
+        <span class="text-base sm:text-lg font-semibold tracking-tight">PackCampus</span>
+      </a>
+      <a href="/intern-kontrolle" class="flex items-center gap-2 text-xs sm:text-sm text-gray-400 hover:text-orange-500 transition-colors font-medium">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+        Dashboard
+      </a>
+    </div>
+  </header>
+
+  <!-- Login Gate -->
+  <div id="loginGate" class="min-h-[60vh] flex items-center justify-center px-4 sm:px-6">
+    <div class="w-full max-w-sm">
+      <div class="bg-white rounded-3xl border border-gray-200/60 shadow-sm p-6 sm:p-8">
+        <div class="w-12 h-12 bg-orange-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
+          <svg class="w-6 h-6 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+          </svg>
+        </div>
+        <h2 class="text-lg font-semibold text-center text-gray-900 mb-1">Geschützter Bereich</h2>
+        <p class="text-sm text-gray-400 text-center mb-6">Bitte Passwort eingeben</p>
+        <form id="loginForm" class="space-y-4">
+          <input
+            id="loginPassword"
+            type="password"
+            placeholder="Passwort"
+            autocomplete="current-password"
+            class="w-full px-4 py-3 bg-gray-50 border border-gray-200/60 rounded-xl text-sm text-gray-900 placeholder-gray-400 outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100 focus:bg-white transition-all"
+          />
+          <div id="loginError" class="hidden text-sm text-red-600 bg-red-50 text-center py-2 rounded-xl"></div>
+          <button
+            type="submit"
+            class="w-full py-3 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold rounded-xl transition-colors"
+          >
+            Anmelden
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Media Content (hidden until auth) -->
+  <div id="mediaContent" class="hidden">
+    <section class="max-w-6xl mx-auto px-4 sm:px-6 pt-8 sm:pt-12 pb-4 sm:pb-6">
+      <div class="flex flex-col gap-4">
+        <div>
+          <p class="text-xs sm:text-sm font-medium text-orange-500 tracking-wide uppercase mb-2 sm:mb-3">Verwaltung</p>
+          <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-gray-900">Medien-Manager</h1>
+          <p class="mt-2 text-sm text-gray-400">Alle in Posts und Tags referenzierten Medien auf einen Blick.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Loading State -->
+    <div id="loadingState" class="max-w-6xl mx-auto px-4 sm:px-6 py-16 text-center">
+      <div class="w-12 h-12 border-4 border-gray-200 border-t-orange-500 rounded-full animate-spin mx-auto mb-4"></div>
+      <p class="text-sm text-gray-400">Medien werden aus Ghost geladen...</p>
+    </div>
+
+    <!-- Stats -->
+    <section id="statsSection" class="hidden max-w-6xl mx-auto px-4 sm:px-6 pb-4">
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+        <div class="bg-white rounded-2xl border border-gray-200/60 shadow-sm p-4 sm:p-5">
+          <p class="text-xs text-gray-400 font-medium uppercase tracking-wide mb-1">Gesamt</p>
+          <p id="statTotal" class="text-2xl sm:text-3xl font-bold text-gray-900">0</p>
+        </div>
+        <div class="bg-white rounded-2xl border border-gray-200/60 shadow-sm p-4 sm:p-5">
+          <p class="text-xs text-gray-400 font-medium uppercase tracking-wide mb-1">Bilder</p>
+          <p id="statImages" class="text-2xl sm:text-3xl font-bold text-blue-600">0</p>
+        </div>
+        <div class="bg-white rounded-2xl border border-gray-200/60 shadow-sm p-4 sm:p-5">
+          <p class="text-xs text-gray-400 font-medium uppercase tracking-wide mb-1">Videos</p>
+          <p id="statVideos" class="text-2xl sm:text-3xl font-bold text-purple-600">0</p>
+        </div>
+        <div class="bg-white rounded-2xl border border-gray-200/60 shadow-sm p-4 sm:p-5">
+          <p class="text-xs text-gray-400 font-medium uppercase tracking-wide mb-1">Audio</p>
+          <p id="statAudio" class="text-2xl sm:text-3xl font-bold text-emerald-600">0</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Filters -->
+    <section id="filtersSection" class="hidden max-w-6xl mx-auto px-4 sm:px-6 py-4">
+      <div class="flex flex-wrap items-center gap-3">
+        <div class="flex flex-wrap gap-1.5" id="filterButtons">
+          <button data-filter="all" class="filter-btn px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-medium bg-orange-500 text-white transition-all cursor-pointer">Alle</button>
+          <button data-filter="image" class="filter-btn px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-medium bg-white border border-gray-200 text-gray-600 hover:border-orange-300 hover:text-orange-600 transition-all cursor-pointer">Bilder</button>
+          <button data-filter="video" class="filter-btn px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-medium bg-white border border-gray-200 text-gray-600 hover:border-orange-300 hover:text-orange-600 transition-all cursor-pointer">Videos</button>
+          <button data-filter="audio" class="filter-btn px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-medium bg-white border border-gray-200 text-gray-600 hover:border-orange-300 hover:text-orange-600 transition-all cursor-pointer">Audio</button>
+        </div>
+        <div class="flex-1 min-w-[200px]">
+          <input
+            id="searchInput"
+            type="text"
+            placeholder="Dateiname suchen..."
+            class="w-full px-4 py-2 bg-gray-50 border border-gray-200/60 rounded-xl text-sm text-gray-900 placeholder-gray-400 outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100 focus:bg-white transition-all"
+          />
+        </div>
+        <span id="resultCount" class="text-xs sm:text-sm text-gray-400"></span>
+      </div>
+    </section>
+
+    <!-- Media Grid -->
+    <section class="max-w-6xl mx-auto px-4 sm:px-6 pb-16 sm:pb-24">
+      <div id="mediaGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+      <div id="mediaEmpty" class="hidden text-center py-20">
+        <div class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
+          <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-400 mb-2">Keine Medien gefunden</h3>
+        <p class="text-sm text-gray-400">Passe deine Filter oder Suche an.</p>
+      </div>
+      <div id="errorState" class="hidden text-center py-20">
+        <div class="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
+          <svg class="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
+          </svg>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-400 mb-2">Fehler beim Laden</h3>
+        <p id="errorMessage" class="text-sm text-red-500"></p>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const loginForm = document.getElementById("loginForm");
+    const loginPassword = document.getElementById("loginPassword") as HTMLInputElement;
+    const loginError = document.getElementById("loginError")!;
+    const loginGate = document.getElementById("loginGate")!;
+    const mediaContent = document.getElementById("mediaContent")!;
+    const loadingState = document.getElementById("loadingState")!;
+    const statsSection = document.getElementById("statsSection")!;
+    const filtersSection = document.getElementById("filtersSection")!;
+    const mediaGrid = document.getElementById("mediaGrid")!;
+    const mediaEmpty = document.getElementById("mediaEmpty")!;
+    const errorState = document.getElementById("errorState")!;
+    const errorMessage = document.getElementById("errorMessage")!;
+    const searchInput = document.getElementById("searchInput") as HTMLInputElement;
+    const resultCount = document.getElementById("resultCount")!;
+    const filterButtons = document.querySelectorAll(".filter-btn");
+
+    interface MediaItem {
+      url: string;
+      filename: string;
+      type: "image" | "video" | "audio";
+      usedIn: { title: string; slug: string }[];
+    }
+
+    let allMedia: MediaItem[] = [];
+    let currentFilter = "all";
+    let searchQuery = "";
+    let authToken = "";
+
+    // Check session
+    const stored = sessionStorage.getItem("admin_token");
+    if (stored) {
+      authToken = stored;
+      authenticate(stored);
+    }
+
+    loginForm?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const pw = loginPassword?.value;
+      if (!pw) return;
+
+      try {
+        const res = await fetch("/api/auth", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ password: pw }),
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          loginError.textContent = data.error || "Fehler bei der Anmeldung.";
+          loginError.classList.remove("hidden");
+          return;
+        }
+
+        authToken = data.token;
+        sessionStorage.setItem("admin_token", authToken);
+        authenticate(authToken);
+      } catch {
+        loginError.textContent = "Verbindung fehlgeschlagen.";
+        loginError.classList.remove("hidden");
+      }
+    });
+
+    async function authenticate(token: string) {
+      loginGate.classList.add("hidden");
+      mediaContent.classList.remove("hidden");
+
+      try {
+        const res = await fetch("/api/media-scan", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token }),
+        });
+
+        if (!res.ok) {
+          if (res.status === 401) {
+            sessionStorage.removeItem("admin_token");
+            loginGate.classList.remove("hidden");
+            mediaContent.classList.add("hidden");
+            return;
+          }
+          const data = await res.json();
+          throw new Error(data.error || `HTTP ${res.status}`);
+        }
+
+        const data = await res.json();
+        allMedia = data.media;
+
+        // Update stats
+        document.getElementById("statTotal")!.textContent = data.stats.total.toString();
+        document.getElementById("statImages")!.textContent = data.stats.images.toString();
+        document.getElementById("statVideos")!.textContent = data.stats.videos.toString();
+        document.getElementById("statAudio")!.textContent = data.stats.audio.toString();
+
+        loadingState.classList.add("hidden");
+        statsSection.classList.remove("hidden");
+        filtersSection.classList.remove("hidden");
+        renderMedia();
+      } catch (err: any) {
+        loadingState.classList.add("hidden");
+        errorState.classList.remove("hidden");
+        errorMessage.textContent = err.message || "Unbekannter Fehler.";
+      }
+    }
+
+    // Filter buttons
+    filterButtons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        currentFilter = (btn as HTMLElement).dataset.filter || "all";
+        filterButtons.forEach((b) => {
+          b.classList.remove("bg-orange-500", "text-white");
+          b.classList.add("bg-white", "border", "border-gray-200", "text-gray-600");
+        });
+        btn.classList.add("bg-orange-500", "text-white");
+        btn.classList.remove("bg-white", "border", "border-gray-200", "text-gray-600");
+        renderMedia();
+      });
+    });
+
+    // Search
+    searchInput?.addEventListener("input", () => {
+      searchQuery = searchInput.value.toLowerCase();
+      renderMedia();
+    });
+
+    const typeBadge: Record<string, { label: string; color: string; bg: string }> = {
+      image: { label: "Bild", color: "text-blue-700", bg: "bg-blue-50 border-blue-200" },
+      video: { label: "Video", color: "text-purple-700", bg: "bg-purple-50 border-purple-200" },
+      audio: { label: "Audio", color: "text-emerald-700", bg: "bg-emerald-50 border-emerald-200" },
+    };
+
+    function renderMedia() {
+      let filtered = allMedia;
+
+      if (currentFilter !== "all") {
+        filtered = filtered.filter((m) => m.type === currentFilter);
+      }
+
+      if (searchQuery) {
+        filtered = filtered.filter((m) => m.filename.toLowerCase().includes(searchQuery));
+      }
+
+      resultCount.textContent = `${filtered.length} von ${allMedia.length} Dateien`;
+
+      if (filtered.length === 0) {
+        mediaGrid.innerHTML = "";
+        mediaEmpty.classList.remove("hidden");
+        return;
+      }
+
+      mediaEmpty.classList.add("hidden");
+      mediaGrid.innerHTML = filtered
+        .map((m) => {
+          const badge = typeBadge[m.type] || typeBadge.image;
+          const posts = m.usedIn
+            .map((p) => `<a href="/post/${p.slug}" target="_blank" class="text-orange-500 hover:text-orange-600 hover:underline">${escapeHtml(p.title)}</a>`)
+            .join(", ");
+
+          let preview = "";
+          if (m.type === "image") {
+            preview = `<img src="${escapeAttr(m.url)}" alt="${escapeAttr(m.filename)}" class="w-full h-40 object-cover rounded-xl mb-3" loading="lazy" />`;
+          } else if (m.type === "video") {
+            preview = `
+              <div class="w-full h-40 bg-purple-50 rounded-xl mb-3 flex items-center justify-center">
+                <svg class="w-12 h-12 text-purple-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>`;
+          } else {
+            preview = `
+              <div class="w-full h-40 bg-emerald-50 rounded-xl mb-3 flex items-center justify-center">
+                <svg class="w-12 h-12 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                </svg>
+              </div>`;
+          }
+
+          return `
+            <div class="bg-white rounded-2xl border border-gray-200/60 shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+              ${preview}
+              <div class="px-4 pb-4">
+                <div class="flex items-center gap-2 mb-2">
+                  <span class="inline-flex px-2 py-0.5 rounded-lg text-xs font-semibold border ${badge.bg} ${badge.color}">${badge.label}</span>
+                </div>
+                <p class="text-sm font-medium text-gray-900 truncate mb-2" title="${escapeAttr(m.filename)}">${escapeHtml(m.filename)}</p>
+                <div class="text-xs text-gray-400">
+                  <span class="font-medium text-gray-500">Verwendet in:</span> ${posts}
+                </div>
+              </div>
+            </div>
+          `;
+        })
+        .join("");
+    }
+
+    function escapeHtml(str: string): string {
+      const div = document.createElement("div");
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function escapeAttr(str: string): string {
+      return str.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/'/g, "&#39;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+  </script>
+</Layout>
