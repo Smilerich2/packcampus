@@ -190,7 +190,7 @@ const glossarLetters = Object.keys(glossarGrouped).sort((a, b) => a.localeCompar
             type="text"
             autocomplete="off"
             placeholder="Fachbegriff suchen..."
-            class="w-full bg-gray-50 border border-transparent rounded-2xl py-3.5 pl-11 pr-4 text-sm text-gray-900 placeholder-gray-400 outline-none focus:bg-white focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all"
+            class="w-full bg-gray-50 border border-transparent rounded-2xl py-3.5 pl-11 pr-4 text-sm text-gray-900 placeholder-gray-400 outline-none focus:bg-white focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all"
           />
         </div>
       </div>
@@ -202,7 +202,7 @@ const glossarLetters = Object.keys(glossarGrouped).sort((a, b) => a.localeCompar
             {glossarLetters.map((letter) => (
               <div class="glossar-letter-group" id={`panel-letter-${letter}`}>
                 <div class="sticky top-0 bg-white/90 backdrop-blur-md px-4 py-2 mb-1 z-10 flex items-center gap-3">
-                  <span class="text-2xl font-black text-brand-500">{letter}</span>
+                  <span class="text-2xl font-black text-orange-500">{letter}</span>
                   <div class="h-px bg-gray-100 flex-grow mt-1"></div>
                 </div>
                 {glossarGrouped[letter].map((post) => (
@@ -212,14 +212,14 @@ const glossarLetters = Object.keys(glossarGrouped).sort((a, b) => a.localeCompar
                     data-title={post.title.toLowerCase()}
                     data-excerpt={(post.excerpt || "").toLowerCase()}
                   >
-                    <summary class="flex items-center justify-between py-3 px-2 cursor-pointer rounded-xl hover:bg-gray-50 transition-colors select-none group-open:bg-brand-50/50 group-open:text-brand-600">
-                      <span class="font-bold text-[15px] text-gray-800 group-open:text-brand-700 transition-colors">{post.title}</span>
+                    <summary class="flex items-center justify-between py-3 px-2 cursor-pointer rounded-xl hover:bg-gray-50 transition-colors select-none group-open:bg-orange-50/50 group-open:text-orange-600">
+                      <span class="font-bold text-[15px] text-gray-800 group-open:text-orange-700 transition-colors">{post.title}</span>
                       <i data-lucide="plus" class="w-4 h-4 text-gray-400 group-open:hidden flex-shrink-0 ml-4"></i>
-                      <i data-lucide="minus" class="w-4 h-4 text-brand-500 hidden group-open:block flex-shrink-0 ml-4"></i>
+                      <i data-lucide="minus" class="w-4 h-4 text-orange-500 hidden group-open:block flex-shrink-0 ml-4"></i>
                     </summary>
                     <div class="px-2 pb-4 pt-1">
                       <div
-                        class="pl-4 border-l-2 border-brand-200 text-sm text-gray-600 leading-relaxed"
+                        class="pl-4 border-l-2 border-orange-200 text-sm text-gray-600 leading-relaxed"
                         set:html={post.html}
                       />
                     </div>
@@ -682,10 +682,10 @@ const glossarLetters = Object.keys(glossarGrouped).sort((a, b) => a.localeCompar
 
             var titleDiv = document.createElement("div");
             titleDiv.className = "flex items-center gap-2 font-bold text-gray-800";
-            titleDiv.innerHTML = '<i data-lucide="book-open" class="w-5 h-5 text-brand-500"></i> ' + titleText;
+            titleDiv.innerHTML = '<i data-lucide="book-open" class="w-5 h-5 text-orange-500"></i> ' + titleText;
 
             var stepPill = document.createElement("span");
-            stepPill.className = "bg-brand-50 text-brand-600 font-bold text-xs tracking-widest uppercase px-4 py-1.5 rounded-full";
+            stepPill.className = "bg-orange-50 text-orange-600 font-bold text-xs tracking-widest uppercase px-4 py-1.5 rounded-full";
             stepPill.textContent = "Schritt 1 / " + totalSlides;
 
             header.appendChild(titleDiv);
@@ -696,7 +696,7 @@ const glossarLetters = Object.keys(glossarGrouped).sort((a, b) => a.localeCompar
             var progressOuter = document.createElement("div");
             progressOuter.className = "h-1.5 w-full bg-gray-100 rounded-full mb-10";
             var progressInner = document.createElement("div");
-            progressInner.className = "bg-brand-500 h-full rounded-full transition-all duration-500";
+            progressInner.className = "bg-orange-500 h-full rounded-full transition-all duration-500";
             progressInner.style.width = (1 / totalSlides * 100) + "%";
             progressOuter.appendChild(progressInner);
             container.appendChild(progressOuter);
@@ -725,7 +725,7 @@ const glossarLetters = Object.keys(glossarGrouped).sort((a, b) => a.localeCompar
             btnBack.disabled = true;
 
             var btnNext = document.createElement("button");
-            btnNext.className = "px-8 py-3.5 rounded-2xl font-bold text-sm text-white bg-gray-900 hover:bg-brand-500 transition-all shadow-lg hover:-translate-y-0.5";
+            btnNext.className = "px-8 py-3.5 rounded-2xl font-bold text-sm text-white bg-gray-900 hover:bg-orange-500 transition-all shadow-lg hover:-translate-y-0.5";
             btnNext.innerHTML = '<span class="flex items-center gap-2">Weiter <i data-lucide="arrow-right" class="w-4 h-4"></i></span>';
 
             footer.appendChild(btnBack);
@@ -767,7 +767,7 @@ const glossarLetters = Object.keys(glossarGrouped).sort((a, b) => a.localeCompar
                   next.className = "px-8 py-3.5 rounded-2xl font-bold text-sm text-white bg-green-500 hover:bg-green-600 transition-all shadow-lg hover:-translate-y-0.5";
                 } else {
                   next.innerHTML = '<span class="flex items-center gap-2">Weiter <i data-lucide="arrow-right" class="w-4 h-4"></i></span>';
-                  next.className = "px-8 py-3.5 rounded-2xl font-bold text-sm text-white bg-gray-900 hover:bg-brand-500 transition-all shadow-lg hover:-translate-y-0.5";
+                  next.className = "px-8 py-3.5 rounded-2xl font-bold text-sm text-white bg-gray-900 hover:bg-orange-500 transition-all shadow-lg hover:-translate-y-0.5";
                 }
 
                 // Re-render lucide icons inside this container
