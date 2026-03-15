@@ -163,7 +163,7 @@ const glossarLetters = Object.keys(glossarGrouped).sort((a, b) => a.localeCompar
     <div id="backdrop" onclick="toggleGlossary(false)" class="fixed inset-0 bg-black/40 z-[60] opacity-0 pointer-events-none transition-opacity duration-300"></div>
 
     <!-- Glossary Side Panel -->
-    <aside id="glossaryPanel" class="fixed top-0 right-0 bottom-0 w-full md:w-[450px] bg-white z-[70] translate-x-full transition-transform duration-300 ease-out shadow-2xl flex flex-col">
+    <aside id="glossaryPanel" class="premium-glossary fixed top-0 right-0 bottom-0 w-full md:w-[450px] bg-white z-[70] translate-x-full transition-transform duration-300 ease-out shadow-2xl flex flex-col">
       <!-- Panel Header -->
       <div class="flex items-center justify-between px-6 py-5 border-b border-gray-100 flex-shrink-0">
         <div class="flex items-center gap-3">
@@ -182,57 +182,49 @@ const glossarLetters = Object.keys(glossarGrouped).sort((a, b) => a.localeCompar
       </div>
 
       <!-- Panel Search -->
-      <div class="px-6 py-4 border-b border-gray-100 flex-shrink-0">
+      <div class="shrink-0 bg-white relative z-20 px-5 pt-4 pb-3">
         <div class="relative">
-          <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-orange-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
+          <i data-lucide="search" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"></i>
           <input
             id="panel-search"
             type="text"
             autocomplete="off"
             placeholder="Fachbegriff suchen..."
-            class="w-full pl-9 pr-4 py-2.5 text-sm bg-gray-50 border border-gray-200/60 rounded-xl text-gray-900 placeholder-gray-400 outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100 focus:bg-white transition-all"
+            class="w-full bg-gray-50 border border-transparent rounded-2xl py-3.5 pl-11 pr-4 text-sm text-gray-900 placeholder-gray-400 outline-none focus:bg-white focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all"
           />
         </div>
       </div>
 
       <!-- Panel Content -->
-      <div class="flex-1 overflow-y-auto" id="panel-content">
+      <div class="premium-scroll flex-1 overflow-y-auto px-2 pb-8 relative z-10" id="panel-content">
         {glossarLetters.length > 0 ? (
-          <div class="px-6 py-4 space-y-8">
+          <div>
             {glossarLetters.map((letter) => (
               <div class="glossar-letter-group" id={`panel-letter-${letter}`}>
-                <div class="flex items-center gap-3 mb-3">
-                  <span class="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center text-white font-bold text-sm flex-shrink-0">{letter}</span>
-                  <div class="flex-1 h-px bg-gradient-to-r from-orange-200 via-orange-100 to-transparent" />
+                <div class="sticky top-0 bg-white/90 backdrop-blur-md px-4 py-2 mb-1 z-10 flex items-center gap-3">
+                  <span class="text-2xl font-black text-brand-500">{letter}</span>
+                  <div class="h-px bg-gray-100 flex-grow mt-1"></div>
                 </div>
-                <div class="space-y-2">
-                  {glossarGrouped[letter].map((post) => (
-                    <details
-                      class="glossar-panel-entry group bg-gray-50 rounded-xl overflow-hidden"
-                      data-slug={post.slug}
-                      data-title={post.title.toLowerCase()}
-                      data-excerpt={(post.excerpt || "").toLowerCase()}
-                    >
-                      <summary class="flex items-center justify-between px-4 py-3 cursor-pointer select-none hover:bg-orange-50 transition-colors text-sm font-medium text-gray-900">
-                        <span>{post.title}</span>
-                        <svg class="w-4 h-4 text-gray-400 group-open:rotate-180 transition-transform duration-200 flex-shrink-0 ml-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </summary>
-                      <div class="px-4 pb-4 pt-1">
-                        <div
-                          class="prose prose-sm prose-gray max-w-none
-                            prose-p:leading-relaxed prose-p:text-gray-600
-                            prose-a:text-orange-600 prose-strong:text-gray-800
-                            prose-li:text-gray-600"
-                          set:html={post.html}
-                        />
-                      </div>
-                    </details>
-                  ))}
-                </div>
+                {glossarGrouped[letter].map((post) => (
+                  <details
+                    class="glossar-panel-entry group px-2"
+                    data-slug={post.slug}
+                    data-title={post.title.toLowerCase()}
+                    data-excerpt={(post.excerpt || "").toLowerCase()}
+                  >
+                    <summary class="flex items-center justify-between py-3 px-2 cursor-pointer rounded-xl hover:bg-gray-50 transition-colors select-none group-open:bg-brand-50/50 group-open:text-brand-600">
+                      <span class="font-bold text-[15px] text-gray-800 group-open:text-brand-700 transition-colors">{post.title}</span>
+                      <i data-lucide="plus" class="w-4 h-4 text-gray-400 group-open:hidden flex-shrink-0 ml-4"></i>
+                      <i data-lucide="minus" class="w-4 h-4 text-brand-500 hidden group-open:block flex-shrink-0 ml-4"></i>
+                    </summary>
+                    <div class="px-2 pb-4 pt-1">
+                      <div
+                        class="pl-4 border-l-2 border-brand-200 text-sm text-gray-600 leading-relaxed"
+                        set:html={post.html}
+                      />
+                    </div>
+                  </details>
+                ))}
               </div>
             ))}
           </div>
@@ -242,9 +234,7 @@ const glossarLetters = Object.keys(glossarGrouped).sort((a, b) => a.localeCompar
           </div>
         )}
         <div id="panel-no-results" class="hidden px-6 py-16 text-center">
-          <svg class="w-10 h-10 text-gray-200 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
+          <i data-lucide="search-x" class="w-10 h-10 text-gray-200 mx-auto mb-4"></i>
           <p class="text-sm text-gray-400">Kein Fachbegriff gefunden.</p>
         </div>
       </div>
@@ -437,13 +427,26 @@ const glossarLetters = Object.keys(glossarGrouped).sort((a, b) => a.localeCompar
       }
     </script>
 
-    <!-- Panel search filtering (module script) -->
+    <!-- Panel search filtering + accordion (module script) -->
     <script>
       const panelSearch = document.getElementById("panel-search");
       const panelEntries = document.querySelectorAll(".glossar-panel-entry");
       const panelGroups = document.querySelectorAll(".glossar-letter-group");
       const panelNoResults = document.getElementById("panel-no-results");
       const panelContentInner = document.querySelector("#panel-content > div:first-child");
+
+      // Akkordeon: nur ein Begriff gleichzeitig offen
+      panelEntries.forEach(targetDetail => {
+        targetDetail.addEventListener("click", () => {
+          if (!targetDetail.open) {
+            panelEntries.forEach(detail => {
+              if (detail !== targetDetail && detail.open) {
+                detail.removeAttribute("open");
+              }
+            });
+          }
+        });
+      });
 
       if (panelSearch) {
         panelSearch.addEventListener("input", () => {
