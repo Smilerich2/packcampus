@@ -39,6 +39,26 @@
   display: none !important;
 }
 
+/* ── Slideshow Base & Animations ── */
+.pc-slides-wrapper {
+  display: grid;
+}
+.pc-slide-item {
+  grid-area: 1 / 1 / 2 / 2;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(15px);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+}
+.pc-slide-item.is-active {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  pointer-events: auto;
+  z-index: 10;
+}
+
 /* ── Ghost Card Base ── */
 .kg-card {
   margin: 2rem 0;

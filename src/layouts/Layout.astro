@@ -623,6 +623,173 @@ const glossarLetters = Object.keys(glossarGrouped).sort((a, b) => a.localeCompar
           bq.parentNode.replaceChild(callout, bq);
         }
 
+        // ── Slideshow Parser ──
+        (function initSlideshows() {
+          var allP = document.querySelectorAll("p");
+          var startMarkers = [];
+          for (var si = 0; si < allP.length; si++) {
+            if (allP[si].textContent.trim().indexOf("[slideshow:") === 0) {
+              startMarkers.push(allP[si]);
+            }
+          }
+
+          for (var m = 0; m < startMarkers.length; m++) {
+            var startEl = startMarkers[m];
+            var titleText = startEl.textContent.trim()
+              .replace("[slideshow:", "").replace("]", "").trim();
+
+            // Collect slides (array of arrays of DOM nodes)
+            var slidesContent = [[]];
+            var toRemove = [];
+            var current = startEl.nextElementSibling;
+            var endMarker = null;
+
+            while (current) {
+              var next = current.nextElementSibling;
+              if (current.textContent.trim() === "[/slideshow]") {
+                endMarker = current;
+                break;
+              }
+              if (current.tagName === "HR") {
+                slidesContent.push([]);
+                toRemove.push(current);
+              } else {
+                slidesContent[slidesContent.length - 1].push(current);
+              }
+              current = next;
+            }
+
+            if (!endMarker) continue;
+
+            var totalSlides = slidesContent.length;
+
+            // Remove collected elements from DOM (don't destroy them, just detach)
+            for (var r = 0; r < toRemove.length; r++) {
+              toRemove[r].parentNode.removeChild(toRemove[r]);
+            }
+            if (endMarker) endMarker.parentNode.removeChild(endMarker);
+
+            // Build container
+            var container = document.createElement("div");
+            container.className = "not-prose bg-white rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 p-6 md:p-10 flex flex-col relative my-10";
+
+            // Header row
+            var header = document.createElement("div");
+            header.className = "flex items-center justify-between mb-4";
+
+            var titleDiv = document.createElement("div");
+            titleDiv.className = "flex items-center gap-2 font-bold text-gray-800";
+            titleDiv.innerHTML = '<i data-lucide="book-open" class="w-5 h-5 text-brand-500"></i> ' + titleText;
+
+            var stepPill = document.createElement("span");
+            stepPill.className = "bg-brand-50 text-brand-600 font-bold text-xs tracking-widest uppercase px-4 py-1.5 rounded-full";
+            stepPill.textContent = "Schritt 1 / " + totalSlides;
+
+            header.appendChild(titleDiv);
+            header.appendChild(stepPill);
+            container.appendChild(header);
+
+            // Progress bar
+            var progressOuter = document.createElement("div");
+            progressOuter.className = "h-1.5 w-full bg-gray-100 rounded-full mb-10";
+            var progressInner = document.createElement("div");
+            progressInner.className = "bg-brand-500 h-full rounded-full transition-all duration-500";
+            progressInner.style.width = (1 / totalSlides * 100) + "%";
+            progressOuter.appendChild(progressInner);
+            container.appendChild(progressOuter);
+
+            // Slides wrapper
+            var wrapper = document.createElement("div");
+            wrapper.className = "pc-slides-wrapper";
+
+            for (var s = 0; s < slidesContent.length; s++) {
+              var slide = document.createElement("div");
+              slide.className = "pc-slide-item" + (s === 0 ? " is-active" : "");
+              for (var c = 0; c < slidesContent[s].length; c++) {
+                slide.appendChild(slidesContent[s][c]);
+              }
+              wrapper.appendChild(slide);
+            }
+            container.appendChild(wrapper);
+
+            // Footer with navigation buttons
+            var footer = document.createElement("div");
+            footer.className = "flex items-center justify-between mt-10";
+
+            var btnBack = document.createElement("button");
+            btnBack.className = "px-6 py-3 rounded-2xl font-bold text-sm text-gray-400 bg-gray-100 transition-all cursor-not-allowed";
+            btnBack.innerHTML = '<span class="flex items-center gap-2"><i data-lucide="arrow-left" class="w-4 h-4"></i> Zurück</span>';
+            btnBack.disabled = true;
+
+            var btnNext = document.createElement("button");
+            btnNext.className = "px-8 py-3.5 rounded-2xl font-bold text-sm text-white bg-gray-900 hover:bg-brand-500 transition-all shadow-lg hover:-translate-y-0.5";
+            btnNext.innerHTML = '<span class="flex items-center gap-2">Weiter <i data-lucide="arrow-right" class="w-4 h-4"></i></span>';
+
+            footer.appendChild(btnBack);
+            footer.appendChild(btnNext);
+            container.appendChild(footer);
+
+            // Insert container where start marker was
+            startEl.parentNode.replaceChild(container, startEl);
+
+            // State logic (closure)
+            (function(cont, pill, progInner, back, next, total) {
+              var currentSlide = 0;
+              var slides = cont.querySelectorAll(".pc-slide-item");
+
+              function update() {
+                pill.textContent = "Schritt " + (currentSlide + 1) + " / " + total;
+                progInner.style.width = ((currentSlide + 1) / total * 100) + "%";
+
+                for (var i = 0; i < slides.length; i++) {
+                  if (i === currentSlide) {
+                    slides[i].classList.add("is-active");
+                  } else {
+                    slides[i].classList.remove("is-active");
+                  }
+                }
+
+                // Back button state
+                if (currentSlide === 0) {
+                  back.disabled = true;
+                  back.className = "px-6 py-3 rounded-2xl font-bold text-sm text-gray-400 bg-gray-100 transition-all cursor-not-allowed";
+                } else {
+                  back.disabled = false;
+                  back.className = "px-6 py-3 rounded-2xl font-bold text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 transition-all cursor-pointer";
+                }
+
+                // Next button state
+                if (currentSlide === total - 1) {
+                  next.innerHTML = '<span class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4"></i> Fertig</span>';
+                  next.className = "px-8 py-3.5 rounded-2xl font-bold text-sm text-white bg-green-500 hover:bg-green-600 transition-all shadow-lg hover:-translate-y-0.5";
+                } else {
+                  next.innerHTML = '<span class="flex items-center gap-2">Weiter <i data-lucide="arrow-right" class="w-4 h-4"></i></span>';
+                  next.className = "px-8 py-3.5 rounded-2xl font-bold text-sm text-white bg-gray-900 hover:bg-brand-500 transition-all shadow-lg hover:-translate-y-0.5";
+                }
+
+                // Re-render lucide icons inside this container
+                if (typeof lucide !== "undefined" && lucide.createIcons) {
+                  lucide.createIcons();
+                }
+              }
+
+              back.addEventListener("click", function() {
+                if (currentSlide > 0) {
+                  currentSlide--;
+                  update();
+                }
+              });
+
+              next.addEventListener("click", function() {
+                if (currentSlide < total - 1) {
+                  currentSlide++;
+                  update();
+                }
+              });
+            })(container, stepPill, progressInner, btnBack, btnNext, totalSlides);
+          }
+        })();
+
         // Render Lucide icons
         if (typeof lucide !== "undefined" && lucide.createIcons) {
           lucide.createIcons();
