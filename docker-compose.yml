@@ -10,9 +10,12 @@ services:
     network_mode: host
     volumes:
       - feedback-data:/app/data
+      - ghost_ghost_content:/ghost-content
     env_file:
       - .env
     restart: unless-stopped
 
 volumes:
   feedback-data:
+  ghost_ghost_content:
+    external: true
