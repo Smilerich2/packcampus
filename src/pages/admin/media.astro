@@ -34,61 +34,77 @@ import Layout from "../../layouts/Layout.astro";
         <h2 class="text-lg font-semibold text-center text-gray-900 mb-1">Geschützter Bereich</h2>
         <p class="text-sm text-gray-400 text-center mb-6">Bitte Passwort eingeben</p>
         <form id="loginForm" class="space-y-4">
-          <input
-            id="loginPassword"
-            type="password"
-            placeholder="Passwort"
-            autocomplete="current-password"
-            class="w-full px-4 py-3 bg-gray-50 border border-gray-200/60 rounded-xl text-sm text-gray-900 placeholder-gray-400 outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100 focus:bg-white transition-all"
-          />
+          <input id="loginPassword" type="password" placeholder="Passwort" autocomplete="current-password"
+            class="w-full px-4 py-3 bg-gray-50 border border-gray-200/60 rounded-xl text-sm text-gray-900 placeholder-gray-400 outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100 focus:bg-white transition-all" />
           <div id="loginError" class="hidden text-sm text-red-600 bg-red-50 text-center py-2 rounded-xl"></div>
-          <button
-            type="submit"
-            class="w-full py-3 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold rounded-xl transition-colors"
-          >
-            Anmelden
-          </button>
+          <button type="submit" class="w-full py-3 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold rounded-xl transition-colors">Anmelden</button>
         </form>
       </div>
     </div>
   </div>
 
-  <!-- Media Content (hidden until auth) -->
+  <!-- Media Content -->
   <div id="mediaContent" class="hidden">
-    <section class="max-w-6xl mx-auto px-4 sm:px-6 pt-8 sm:pt-12 pb-4 sm:pb-6">
-      <div class="flex flex-col gap-4">
+    <section class="max-w-6xl mx-auto px-4 sm:px-6 pt-8 sm:pt-12 pb-4">
+      <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
-          <p class="text-xs sm:text-sm font-medium text-orange-500 tracking-wide uppercase mb-2 sm:mb-3">Verwaltung</p>
+          <p class="text-xs sm:text-sm font-medium text-orange-500 tracking-wide uppercase mb-2">Verwaltung</p>
           <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-gray-900">Medien-Manager</h1>
-          <p class="mt-2 text-sm text-gray-400">Alle in Posts und Tags referenzierten Medien auf einen Blick.</p>
         </div>
+        <button id="uploadBtn" class="inline-flex items-center gap-2 px-4 py-2.5 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold rounded-xl transition-colors cursor-pointer">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
+          Hochladen
+        </button>
+        <input id="uploadInput" type="file" accept="image/*,video/*,audio/*" class="hidden" multiple />
       </div>
     </section>
 
-    <!-- Loading State -->
+    <!-- Loading -->
     <div id="loadingState" class="max-w-6xl mx-auto px-4 sm:px-6 py-16 text-center">
       <div class="w-12 h-12 border-4 border-gray-200 border-t-orange-500 rounded-full animate-spin mx-auto mb-4"></div>
       <p class="text-sm text-gray-400">Medien werden aus Ghost geladen...</p>
     </div>
 
+    <!-- Storage Bar -->
+    <section id="storageSection" class="hidden max-w-6xl mx-auto px-4 sm:px-6 pb-4">
+      <div class="bg-white rounded-2xl border border-gray-200/60 shadow-sm p-4 sm:p-5">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+          <span class="text-sm font-semibold text-gray-700">Speicherplatz</span>
+          <span id="storageText" class="text-xs text-gray-400"></span>
+        </div>
+        <div class="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
+          <div id="storageBar" class="h-full bg-gradient-to-r from-orange-400 to-orange-600 rounded-full transition-all duration-500" style="width: 0%"></div>
+        </div>
+        <div class="flex flex-wrap gap-4 mt-3 text-xs text-gray-400">
+          <span>Bilder: <strong id="storageSizeImages" class="text-gray-600">–</strong></span>
+          <span>Videos/Audio: <strong id="storageSizeMedia" class="text-gray-600">–</strong></span>
+          <span>Ghost-Inhalte gesamt: <strong id="storageSizeContent" class="text-gray-600">–</strong></span>
+        </div>
+      </div>
+    </section>
+
     <!-- Stats -->
     <section id="statsSection" class="hidden max-w-6xl mx-auto px-4 sm:px-6 pb-4">
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-        <div class="bg-white rounded-2xl border border-gray-200/60 shadow-sm p-4 sm:p-5">
+      <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+        <div class="bg-white rounded-2xl border border-gray-200/60 shadow-sm p-4">
           <p class="text-xs text-gray-400 font-medium uppercase tracking-wide mb-1">Gesamt</p>
-          <p id="statTotal" class="text-2xl sm:text-3xl font-bold text-gray-900">0</p>
+          <p id="statTotal" class="text-2xl font-bold text-gray-900">0</p>
         </div>
-        <div class="bg-white rounded-2xl border border-gray-200/60 shadow-sm p-4 sm:p-5">
+        <div class="bg-white rounded-2xl border border-gray-200/60 shadow-sm p-4">
           <p class="text-xs text-gray-400 font-medium uppercase tracking-wide mb-1">Bilder</p>
-          <p id="statImages" class="text-2xl sm:text-3xl font-bold text-blue-600">0</p>
+          <p id="statImages" class="text-2xl font-bold text-blue-600">0</p>
         </div>
-        <div class="bg-white rounded-2xl border border-gray-200/60 shadow-sm p-4 sm:p-5">
+        <div class="bg-white rounded-2xl border border-gray-200/60 shadow-sm p-4">
           <p class="text-xs text-gray-400 font-medium uppercase tracking-wide mb-1">Videos</p>
-          <p id="statVideos" class="text-2xl sm:text-3xl font-bold text-purple-600">0</p>
+          <p id="statVideos" class="text-2xl font-bold text-purple-600">0</p>
         </div>
-        <div class="bg-white rounded-2xl border border-gray-200/60 shadow-sm p-4 sm:p-5">
+        <div class="bg-white rounded-2xl border border-gray-200/60 shadow-sm p-4">
           <p class="text-xs text-gray-400 font-medium uppercase tracking-wide mb-1">Audio</p>
-          <p id="statAudio" class="text-2xl sm:text-3xl font-bold text-emerald-600">0</p>
+          <p id="statAudio" class="text-2xl font-bold text-emerald-600">0</p>
+        </div>
+        <div class="bg-white rounded-2xl border border-gray-200/60 shadow-sm p-4">
+          <p class="text-xs text-gray-400 font-medium uppercase tracking-wide mb-1">Ungenutzt</p>
+          <p id="statUnused" class="text-2xl font-bold text-amber-600">0</p>
         </div>
       </div>
     </section>
@@ -97,40 +113,43 @@ import Layout from "../../layouts/Layout.astro";
     <section id="filtersSection" class="hidden max-w-6xl mx-auto px-4 sm:px-6 py-4">
       <div class="flex flex-wrap items-center gap-3">
         <div class="flex flex-wrap gap-1.5" id="filterButtons">
-          <button data-filter="all" class="filter-btn px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-medium bg-orange-500 text-white transition-all cursor-pointer">Alle</button>
-          <button data-filter="image" class="filter-btn px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-medium bg-white border border-gray-200 text-gray-600 hover:border-orange-300 hover:text-orange-600 transition-all cursor-pointer">Bilder</button>
-          <button data-filter="video" class="filter-btn px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-medium bg-white border border-gray-200 text-gray-600 hover:border-orange-300 hover:text-orange-600 transition-all cursor-pointer">Videos</button>
-          <button data-filter="audio" class="filter-btn px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-medium bg-white border border-gray-200 text-gray-600 hover:border-orange-300 hover:text-orange-600 transition-all cursor-pointer">Audio</button>
+          <button data-filter="all" class="filter-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-medium bg-orange-500 text-white transition-all cursor-pointer">Alle</button>
+          <button data-filter="image" class="filter-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-medium bg-white border border-gray-200 text-gray-600 hover:border-orange-300 hover:text-orange-600 transition-all cursor-pointer">Bilder</button>
+          <button data-filter="video" class="filter-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-medium bg-white border border-gray-200 text-gray-600 hover:border-orange-300 hover:text-orange-600 transition-all cursor-pointer">Videos</button>
+          <button data-filter="audio" class="filter-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-medium bg-white border border-gray-200 text-gray-600 hover:border-orange-300 hover:text-orange-600 transition-all cursor-pointer">Audio</button>
+          <button data-filter="unused" class="filter-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-medium bg-white border border-gray-200 text-gray-600 hover:border-orange-300 hover:text-orange-600 transition-all cursor-pointer">Ungenutzt</button>
         </div>
-        <div class="flex-1 min-w-[200px]">
-          <input
-            id="searchInput"
-            type="text"
-            placeholder="Dateiname suchen..."
-            class="w-full px-4 py-2 bg-gray-50 border border-gray-200/60 rounded-xl text-sm text-gray-900 placeholder-gray-400 outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100 focus:bg-white transition-all"
-          />
+        <div class="flex-1 min-w-[180px]">
+          <input id="searchInput" type="text" placeholder="Dateiname suchen..."
+            class="w-full px-4 py-2 bg-gray-50 border border-gray-200/60 rounded-xl text-sm text-gray-900 placeholder-gray-400 outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100 focus:bg-white transition-all" />
         </div>
-        <span id="resultCount" class="text-xs sm:text-sm text-gray-400"></span>
+        <!-- View Toggle -->
+        <div class="flex border border-gray-200 rounded-xl overflow-hidden">
+          <button id="viewGrid" class="view-btn px-3 py-2 bg-orange-500 text-white transition-all cursor-pointer" title="Grid-Ansicht">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+          </button>
+          <button id="viewList" class="view-btn px-3 py-2 bg-white text-gray-400 hover:text-gray-600 transition-all cursor-pointer" title="Listen-Ansicht">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+          </button>
+        </div>
+        <span id="resultCount" class="text-xs text-gray-400"></span>
       </div>
     </section>
 
-    <!-- Media Grid -->
+    <!-- Media Grid / List -->
     <section class="max-w-6xl mx-auto px-4 sm:px-6 pb-16 sm:pb-24">
       <div id="mediaGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+      <div id="mediaList" class="hidden space-y-2"></div>
       <div id="mediaEmpty" class="hidden text-center py-20">
         <div class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
-          <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-          </svg>
+          <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
         </div>
         <h3 class="text-lg font-semibold text-gray-400 mb-2">Keine Medien gefunden</h3>
         <p class="text-sm text-gray-400">Passe deine Filter oder Suche an.</p>
       </div>
       <div id="errorState" class="hidden text-center py-20">
         <div class="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
-          <svg class="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
-          </svg>
+          <svg class="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>
         </div>
         <h3 class="text-lg font-semibold text-gray-400 mb-2">Fehler beim Laden</h3>
         <p id="errorMessage" class="text-sm text-red-500"></p>
@@ -138,100 +157,137 @@ import Layout from "../../layouts/Layout.astro";
     </section>
   </div>
 
+  <!-- Confirm Modal -->
+  <div id="confirmModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+    <div class="bg-white rounded-2xl shadow-xl border border-gray-200/60 p-6 max-w-sm w-full">
+      <h3 id="confirmTitle" class="text-lg font-semibold text-gray-900 mb-2"></h3>
+      <p id="confirmText" class="text-sm text-gray-500 mb-6"></p>
+      <div class="flex gap-3">
+        <button id="confirmCancel" class="flex-1 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-xl transition-colors cursor-pointer">Abbrechen</button>
+        <button id="confirmOk" class="flex-1 py-2.5 bg-red-500 hover:bg-red-600 text-white text-sm font-semibold rounded-xl transition-colors cursor-pointer">Löschen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rename Modal -->
+  <div id="renameModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+    <div class="bg-white rounded-2xl shadow-xl border border-gray-200/60 p-6 max-w-sm w-full">
+      <h3 class="text-lg font-semibold text-gray-900 mb-2">Datei umbenennen</h3>
+      <p id="renameOldName" class="text-xs text-gray-400 mb-4 truncate"></p>
+      <input id="renameInput" type="text" class="w-full px-4 py-3 bg-gray-50 border border-gray-200/60 rounded-xl text-sm text-gray-900 outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100 focus:bg-white transition-all mb-2" />
+      <p id="renameError" class="hidden text-xs text-red-500 mb-2"></p>
+      <p class="text-xs text-gray-400 mb-6">Ghost-Posts werden automatisch aktualisiert.</p>
+      <div class="flex gap-3">
+        <button id="renameCancel" class="flex-1 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-xl transition-colors cursor-pointer">Abbrechen</button>
+        <button id="renameOk" class="flex-1 py-2.5 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold rounded-xl transition-colors cursor-pointer">Umbenennen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-[110] px-5 py-3 rounded-xl text-sm font-medium shadow-lg transition-all"></div>
+
   <script>
+    // DOM refs
     const loginForm = document.getElementById("loginForm");
     const loginPassword = document.getElementById("loginPassword") as HTMLInputElement;
     const loginError = document.getElementById("loginError")!;
     const loginGate = document.getElementById("loginGate")!;
     const mediaContent = document.getElementById("mediaContent")!;
     const loadingState = document.getElementById("loadingState")!;
+    const storageSection = document.getElementById("storageSection")!;
     const statsSection = document.getElementById("statsSection")!;
     const filtersSection = document.getElementById("filtersSection")!;
     const mediaGrid = document.getElementById("mediaGrid")!;
+    const mediaList = document.getElementById("mediaList")!;
     const mediaEmpty = document.getElementById("mediaEmpty")!;
     const errorState = document.getElementById("errorState")!;
     const errorMessage = document.getElementById("errorMessage")!;
     const searchInput = document.getElementById("searchInput") as HTMLInputElement;
     const resultCount = document.getElementById("resultCount")!;
     const filterButtons = document.querySelectorAll(".filter-btn");
+    const viewGridBtn = document.getElementById("viewGrid")!;
+    const viewListBtn = document.getElementById("viewList")!;
+    const uploadBtn = document.getElementById("uploadBtn")!;
+    const uploadInput = document.getElementById("uploadInput") as HTMLInputElement;
+
+    // Modal refs
+    const confirmModal = document.getElementById("confirmModal")!;
+    const confirmTitle = document.getElementById("confirmTitle")!;
+    const confirmText = document.getElementById("confirmText")!;
+    const confirmCancel = document.getElementById("confirmCancel")!;
+    const confirmOk = document.getElementById("confirmOk")!;
+    const renameModal = document.getElementById("renameModal")!;
+    const renameOldName = document.getElementById("renameOldName")!;
+    const renameInput = document.getElementById("renameInput") as HTMLInputElement;
+    const renameError = document.getElementById("renameError")!;
+    const renameCancel = document.getElementById("renameCancel")!;
+    const renameOk = document.getElementById("renameOk")!;
+    const toast = document.getElementById("toast")!;
 
     interface MediaItem {
       url: string;
       filename: string;
       type: "image" | "video" | "audio";
       usedIn: { title: string; slug: string }[];
+      sizeBytes?: number;
+      onDisk?: boolean;
     }
 
     let allMedia: MediaItem[] = [];
     let currentFilter = "all";
     let searchQuery = "";
+    let viewMode: "grid" | "list" = "grid";
     let authToken = "";
 
-    // Check session
+    // Auth
     const stored = sessionStorage.getItem("admin_token");
-    if (stored) {
-      authToken = stored;
-      authenticate(stored);
-    }
+    if (stored) { authToken = stored; authenticate(stored); }
 
     loginForm?.addEventListener("submit", async (e) => {
       e.preventDefault();
       const pw = loginPassword?.value;
       if (!pw) return;
-
       try {
-        const res = await fetch("/api/auth", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ password: pw }),
-        });
+        const res = await fetch("/api/auth", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ password: pw }) });
         const data = await res.json();
-
-        if (!res.ok) {
-          loginError.textContent = data.error || "Fehler bei der Anmeldung.";
-          loginError.classList.remove("hidden");
-          return;
-        }
-
+        if (!res.ok) { loginError.textContent = data.error || "Fehler."; loginError.classList.remove("hidden"); return; }
         authToken = data.token;
         sessionStorage.setItem("admin_token", authToken);
         authenticate(authToken);
-      } catch {
-        loginError.textContent = "Verbindung fehlgeschlagen.";
-        loginError.classList.remove("hidden");
-      }
+      } catch { loginError.textContent = "Verbindung fehlgeschlagen."; loginError.classList.remove("hidden"); }
     });
 
     async function authenticate(token: string) {
       loginGate.classList.add("hidden");
       mediaContent.classList.remove("hidden");
-
       try {
-        const res = await fetch("/api/media-scan", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ token }),
-        });
-
+        const res = await fetch("/api/media-scan", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token }) });
         if (!res.ok) {
-          if (res.status === 401) {
-            sessionStorage.removeItem("admin_token");
-            loginGate.classList.remove("hidden");
-            mediaContent.classList.add("hidden");
-            return;
-          }
-          const data = await res.json();
-          throw new Error(data.error || `HTTP ${res.status}`);
+          if (res.status === 401) { sessionStorage.removeItem("admin_token"); loginGate.classList.remove("hidden"); mediaContent.classList.add("hidden"); return; }
+          const data = await res.json(); throw new Error(data.error || `HTTP ${res.status}`);
         }
-
         const data = await res.json();
         allMedia = data.media;
 
-        // Update stats
-        document.getElementById("statTotal")!.textContent = data.stats.total.toString();
-        document.getElementById("statImages")!.textContent = data.stats.images.toString();
-        document.getElementById("statVideos")!.textContent = data.stats.videos.toString();
-        document.getElementById("statAudio")!.textContent = data.stats.audio.toString();
+        // Stats
+        document.getElementById("statTotal")!.textContent = data.stats.total;
+        document.getElementById("statImages")!.textContent = data.stats.images;
+        document.getElementById("statVideos")!.textContent = data.stats.videos;
+        document.getElementById("statAudio")!.textContent = data.stats.audio;
+        document.getElementById("statUnused")!.textContent = data.stats.unused;
+
+        // Storage
+        if (data.storage && data.storage.totalBytes > 0) {
+          const s = data.storage;
+          const pct = Math.round((s.usedBytes / s.totalBytes) * 100);
+          document.getElementById("storageBar")!.style.width = `${pct}%`;
+          document.getElementById("storageText")!.textContent = `${fmtBytes(s.usedBytes)} von ${fmtBytes(s.totalBytes)} belegt (${pct}%) — ${fmtBytes(s.freeBytes)} frei`;
+          document.getElementById("storageSizeImages")!.textContent = fmtBytes(s.imagesBytes);
+          document.getElementById("storageSizeMedia")!.textContent = fmtBytes(s.mediaBytes);
+          document.getElementById("storageSizeContent")!.textContent = fmtBytes(s.contentBytes);
+          storageSection.classList.remove("hidden");
+        }
 
         loadingState.classList.add("hidden");
         statsSection.classList.remove("hidden");
@@ -244,105 +300,283 @@ import Layout from "../../layouts/Layout.astro";
       }
     }
 
-    // Filter buttons
+    // Filters
     filterButtons.forEach((btn) => {
       btn.addEventListener("click", () => {
         currentFilter = (btn as HTMLElement).dataset.filter || "all";
-        filterButtons.forEach((b) => {
-          b.classList.remove("bg-orange-500", "text-white");
-          b.classList.add("bg-white", "border", "border-gray-200", "text-gray-600");
-        });
-        btn.classList.add("bg-orange-500", "text-white");
-        btn.classList.remove("bg-white", "border", "border-gray-200", "text-gray-600");
+        filterButtons.forEach((b) => { b.classList.remove("bg-orange-500", "text-white"); b.classList.add("bg-white", "border", "border-gray-200", "text-gray-600"); });
+        btn.classList.add("bg-orange-500", "text-white"); btn.classList.remove("bg-white", "border", "border-gray-200", "text-gray-600");
         renderMedia();
       });
     });
 
-    // Search
-    searchInput?.addEventListener("input", () => {
-      searchQuery = searchInput.value.toLowerCase();
-      renderMedia();
+    searchInput?.addEventListener("input", () => { searchQuery = searchInput.value.toLowerCase(); renderMedia(); });
+
+    // View toggle
+    viewGridBtn.addEventListener("click", () => { viewMode = "grid"; updateViewToggle(); renderMedia(); });
+    viewListBtn.addEventListener("click", () => { viewMode = "list"; updateViewToggle(); renderMedia(); });
+
+    function updateViewToggle() {
+      viewGridBtn.classList.toggle("bg-orange-500", viewMode === "grid");
+      viewGridBtn.classList.toggle("text-white", viewMode === "grid");
+      viewGridBtn.classList.toggle("bg-white", viewMode !== "grid");
+      viewGridBtn.classList.toggle("text-gray-400", viewMode !== "grid");
+      viewListBtn.classList.toggle("bg-orange-500", viewMode === "list");
+      viewListBtn.classList.toggle("text-white", viewMode === "list");
+      viewListBtn.classList.toggle("bg-white", viewMode !== "list");
+      viewListBtn.classList.toggle("text-gray-400", viewMode !== "list");
+    }
+
+    // Upload
+    uploadBtn.addEventListener("click", () => uploadInput.click());
+    uploadInput.addEventListener("change", async () => {
+      const files = uploadInput.files;
+      if (!files || files.length === 0) return;
+      for (const file of Array.from(files)) {
+        const form = new FormData();
+        form.append("token", authToken);
+        form.append("file", file);
+        const ext = file.name.split(".").pop()?.toLowerCase() || "";
+        const isMedia = ["mp4", "webm", "mov", "avi", "mkv", "mp3", "m4a", "wav", "ogg", "flac", "aac"].includes(ext);
+        if (isMedia) form.append("purpose", "media");
+        try {
+          showToast(`Lade "${file.name}" hoch...`, "info");
+          const res = await fetch("/api/media-upload", { method: "POST", body: form });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error);
+          showToast(`"${file.name}" hochgeladen!`, "success");
+        } catch (err: any) {
+          showToast(`Fehler: ${err.message}`, "error");
+        }
+      }
+      uploadInput.value = "";
+      // Reload media list
+      authenticate(authToken);
     });
 
+    // CRUD actions (delegated)
+    document.addEventListener("click", (e) => {
+      const target = e.target as HTMLElement;
+      const btn = target.closest("[data-action]") as HTMLElement;
+      if (!btn) return;
+      const action = btn.dataset.action;
+      const url = btn.dataset.url || "";
+      const filename = btn.dataset.filename || "";
+
+      if (action === "delete") showDeleteConfirm(url, filename);
+      if (action === "rename") showRenameDialog(url, filename);
+      if (action === "open") window.open(url, "_blank");
+      if (action === "copy") { navigator.clipboard.writeText(url); showToast("URL kopiert!", "success"); }
+    });
+
+    // Delete
+    let deleteUrl = "";
+    function showDeleteConfirm(url: string, filename: string) {
+      deleteUrl = url;
+      confirmTitle.textContent = "Datei löschen?";
+      confirmText.textContent = `"${filename}" wird dauerhaft vom Server entfernt. Alle Größenvarianten werden ebenfalls gelöscht.`;
+      confirmModal.classList.remove("hidden");
+    }
+    confirmCancel.addEventListener("click", () => confirmModal.classList.add("hidden"));
+    confirmOk.addEventListener("click", async () => {
+      confirmModal.classList.add("hidden");
+      try {
+        showToast("Wird gelöscht...", "info");
+        const res = await fetch("/api/media-crud", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token: authToken, action: "delete", url: deleteUrl }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        showToast(`Gelöscht! (${data.deletedFiles.length} Dateien entfernt)`, "success");
+        allMedia = allMedia.filter((m) => m.url !== deleteUrl);
+        renderMedia();
+      } catch (err: any) { showToast(`Fehler: ${err.message}`, "error"); }
+    });
+
+    // Rename
+    let renameUrl = "";
+    function showRenameDialog(url: string, filename: string) {
+      renameUrl = url;
+      renameOldName.textContent = `Aktuell: ${filename}`;
+      renameInput.value = filename;
+      renameError.classList.add("hidden");
+      renameModal.classList.remove("hidden");
+      renameInput.focus();
+      renameInput.select();
+    }
+    renameCancel.addEventListener("click", () => renameModal.classList.add("hidden"));
+    renameOk.addEventListener("click", doRename);
+    renameInput.addEventListener("keydown", (e) => { if (e.key === "Enter") doRename(); });
+    async function doRename() {
+      const newFilename = renameInput.value.trim();
+      if (!newFilename) { renameError.textContent = "Dateiname darf nicht leer sein."; renameError.classList.remove("hidden"); return; }
+      renameModal.classList.add("hidden");
+      try {
+        showToast("Wird umbenannt...", "info");
+        const res = await fetch("/api/media-crud", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token: authToken, action: "rename", url: renameUrl, newFilename }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        showToast(`Umbenannt! ${data.updatedPosts} Post(s) aktualisiert.`, "success");
+        // Reload to get fresh data
+        authenticate(authToken);
+      } catch (err: any) { showToast(`Fehler: ${err.message}`, "error"); }
+    }
+
+    // Rendering
     const typeBadge: Record<string, { label: string; color: string; bg: string }> = {
       image: { label: "Bild", color: "text-blue-700", bg: "bg-blue-50 border-blue-200" },
       video: { label: "Video", color: "text-purple-700", bg: "bg-purple-50 border-purple-200" },
       audio: { label: "Audio", color: "text-emerald-700", bg: "bg-emerald-50 border-emerald-200" },
     };
 
-    function renderMedia() {
+    function getFiltered(): MediaItem[] {
       let filtered = allMedia;
+      if (currentFilter === "unused") filtered = filtered.filter((m) => m.usedIn.length === 0);
+      else if (currentFilter !== "all") filtered = filtered.filter((m) => m.type === currentFilter);
+      if (searchQuery) filtered = filtered.filter((m) => m.filename.toLowerCase().includes(searchQuery));
+      return filtered;
+    }
 
-      if (currentFilter !== "all") {
-        filtered = filtered.filter((m) => m.type === currentFilter);
-      }
-
-      if (searchQuery) {
-        filtered = filtered.filter((m) => m.filename.toLowerCase().includes(searchQuery));
-      }
-
+    function renderMedia() {
+      const filtered = getFiltered();
       resultCount.textContent = `${filtered.length} von ${allMedia.length} Dateien`;
 
       if (filtered.length === 0) {
-        mediaGrid.innerHTML = "";
+        mediaGrid.innerHTML = ""; mediaList.innerHTML = "";
+        mediaGrid.classList.add("hidden"); mediaList.classList.add("hidden");
         mediaEmpty.classList.remove("hidden");
         return;
       }
-
       mediaEmpty.classList.add("hidden");
-      mediaGrid.innerHTML = filtered
-        .map((m) => {
-          const badge = typeBadge[m.type] || typeBadge.image;
-          const posts = m.usedIn
-            .map((p) => `<a href="/post/${p.slug}" target="_blank" class="text-orange-500 hover:text-orange-600 hover:underline">${escapeHtml(p.title)}</a>`)
-            .join(", ");
 
-          let preview = "";
-          if (m.type === "image") {
-            preview = `<img src="${escapeAttr(m.url)}" alt="${escapeAttr(m.filename)}" class="w-full h-40 object-cover rounded-xl mb-3" loading="lazy" />`;
-          } else if (m.type === "video") {
-            preview = `
-              <div class="w-full h-40 bg-purple-50 rounded-xl mb-3 flex items-center justify-center">
-                <svg class="w-12 h-12 text-purple-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>`;
-          } else {
-            preview = `
-              <div class="w-full h-40 bg-emerald-50 rounded-xl mb-3 flex items-center justify-center">
-                <svg class="w-12 h-12 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
-                </svg>
-              </div>`;
-          }
-
-          return `
-            <div class="bg-white rounded-2xl border border-gray-200/60 shadow-sm overflow-hidden hover:shadow-md transition-shadow">
-              ${preview}
-              <div class="px-4 pb-4">
-                <div class="flex items-center gap-2 mb-2">
-                  <span class="inline-flex px-2 py-0.5 rounded-lg text-xs font-semibold border ${badge.bg} ${badge.color}">${badge.label}</span>
-                </div>
-                <p class="text-sm font-medium text-gray-900 truncate mb-2" title="${escapeAttr(m.filename)}">${escapeHtml(m.filename)}</p>
-                <div class="text-xs text-gray-400">
-                  <span class="font-medium text-gray-500">Verwendet in:</span> ${posts}
-                </div>
-              </div>
-            </div>
-          `;
-        })
-        .join("");
+      if (viewMode === "grid") {
+        mediaGrid.classList.remove("hidden"); mediaList.classList.add("hidden");
+        mediaGrid.innerHTML = filtered.map(renderGridCard).join("");
+      } else {
+        mediaList.classList.remove("hidden"); mediaGrid.classList.add("hidden");
+        mediaList.innerHTML = filtered.map(renderListRow).join("");
+      }
     }
 
-    function escapeHtml(str: string): string {
+    function renderGridCard(m: MediaItem): string {
+      const badge = typeBadge[m.type] || typeBadge.image;
+      const posts = m.usedIn.length > 0
+        ? m.usedIn.map((p) => `<a href="/post/${esc(p.slug)}" target="_blank" class="text-orange-500 hover:underline">${esc(p.title)}</a>`).join(", ")
+        : '<span class="text-amber-500 font-medium">Ungenutzt</span>';
+      const size = m.sizeBytes ? fmtBytes(m.sizeBytes) : "";
+
+      let preview = "";
+      if (m.type === "image") {
+        preview = `<img src="${escAttr(m.url)}" alt="${escAttr(m.filename)}" class="w-full h-40 object-cover" loading="lazy" />`;
+      } else if (m.type === "video") {
+        preview = `<div class="w-full h-40 bg-purple-50 flex items-center justify-center"><svg class="w-12 h-12 text-purple-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div>`;
+      } else {
+        preview = `<div class="w-full h-40 bg-emerald-50 flex items-center justify-center"><svg class="w-12 h-12 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" /></svg></div>`;
+      }
+
+      return `
+        <div class="bg-white rounded-2xl border border-gray-200/60 shadow-sm overflow-hidden hover:shadow-md transition-shadow group">
+          ${preview}
+          <div class="p-4">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="inline-flex px-2 py-0.5 rounded-lg text-xs font-semibold border ${badge.bg} ${badge.color}">${badge.label}</span>
+              ${size ? `<span class="text-xs text-gray-400">${size}</span>` : ""}
+              ${m.onDisk === false ? '<span class="text-xs text-red-400">Nicht auf Disk</span>' : ""}
+            </div>
+            <p class="text-sm font-medium text-gray-900 truncate mb-2" title="${escAttr(m.filename)}">${esc(m.filename)}</p>
+            <div class="text-xs text-gray-400 mb-3"><span class="font-medium text-gray-500">Verwendet in:</span> ${posts}</div>
+            <div class="flex gap-1.5">
+              <button data-action="open" data-url="${escAttr(m.url)}" class="flex-1 py-1.5 text-xs font-medium text-gray-600 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer" title="Original öffnen">Öffnen</button>
+              <button data-action="copy" data-url="${escAttr(m.url)}" class="py-1.5 px-2.5 text-xs font-medium text-gray-600 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer" title="URL kopieren">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+              </button>
+              <button data-action="rename" data-url="${escAttr(m.url)}" data-filename="${escAttr(m.filename)}" class="py-1.5 px-2.5 text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors cursor-pointer" title="Umbenennen">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+              </button>
+              <button data-action="delete" data-url="${escAttr(m.url)}" data-filename="${escAttr(m.filename)}" class="py-1.5 px-2.5 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors cursor-pointer" title="Löschen">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+              </button>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    function renderListRow(m: MediaItem): string {
+      const badge = typeBadge[m.type] || typeBadge.image;
+      const posts = m.usedIn.length > 0
+        ? m.usedIn.map((p) => esc(p.title)).join(", ")
+        : '<span class="text-amber-500">Ungenutzt</span>';
+      const size = m.sizeBytes ? fmtBytes(m.sizeBytes) : "–";
+
+      let thumb = "";
+      if (m.type === "image") {
+        thumb = `<img src="${escAttr(m.url)}" alt="" class="w-12 h-12 object-cover rounded-lg flex-shrink-0" loading="lazy" />`;
+      } else if (m.type === "video") {
+        thumb = `<div class="w-12 h-12 bg-purple-50 rounded-lg flex items-center justify-center flex-shrink-0"><svg class="w-5 h-5 text-purple-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /></svg></div>`;
+      } else {
+        thumb = `<div class="w-12 h-12 bg-emerald-50 rounded-lg flex items-center justify-center flex-shrink-0"><svg class="w-5 h-5 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" /></svg></div>`;
+      }
+
+      return `
+        <div class="bg-white rounded-xl border border-gray-200/60 shadow-sm p-3 hover:shadow-md transition-shadow flex items-center gap-3">
+          ${thumb}
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-medium text-gray-900 truncate">${esc(m.filename)}</p>
+            <div class="flex flex-wrap items-center gap-2 mt-0.5">
+              <span class="inline-flex px-1.5 py-0.5 rounded text-[10px] font-semibold border ${badge.bg} ${badge.color}">${badge.label}</span>
+              <span class="text-xs text-gray-400">${size}</span>
+              <span class="text-xs text-gray-400 truncate">${posts}</span>
+            </div>
+          </div>
+          <div class="flex gap-1 flex-shrink-0">
+            <button data-action="open" data-url="${escAttr(m.url)}" class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer" title="Öffnen">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+            </button>
+            <button data-action="copy" data-url="${escAttr(m.url)}" class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer" title="URL kopieren">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+            </button>
+            <button data-action="rename" data-url="${escAttr(m.url)}" data-filename="${escAttr(m.filename)}" class="p-2 text-blue-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer" title="Umbenennen">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+            </button>
+            <button data-action="delete" data-url="${escAttr(m.url)}" data-filename="${escAttr(m.filename)}" class="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer" title="Löschen">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+            </button>
+          </div>
+        </div>`;
+    }
+
+    // Helpers
+    function fmtBytes(bytes: number): string {
+      if (bytes === 0) return "0 B";
+      const k = 1024;
+      const sizes = ["B", "KB", "MB", "GB", "TB"];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
+    }
+
+    function esc(str: string): string {
       const div = document.createElement("div");
       div.textContent = str;
       return div.innerHTML;
     }
 
-    function escapeAttr(str: string): string {
+    function escAttr(str: string): string {
       return str.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/'/g, "&#39;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    function showToast(msg: string, type: "success" | "error" | "info") {
+      toast.textContent = msg;
+      toast.className = `fixed bottom-6 left-1/2 -translate-x-1/2 z-[110] px-5 py-3 rounded-xl text-sm font-medium shadow-lg transition-all ${
+        type === "success" ? "bg-emerald-500 text-white" :
+        type === "error" ? "bg-red-500 text-white" :
+        "bg-gray-800 text-white"
+      }`;
+      toast.classList.remove("hidden");
+      setTimeout(() => toast.classList.add("hidden"), 3000);
     }
   </script>
 </Layout>
