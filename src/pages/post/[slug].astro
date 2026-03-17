@@ -12,23 +12,33 @@ const { slug } = Astro.params;
 
 const post = await ghost.posts.read({ slug }, { include: "tags,authors" });
 
-// Sanitize embedded full HTML documents in Ghost HTML cards
+// Sanitize embedded full HTML documents in Ghost HTML cards.
+// Strips document-level wrappers but preserves <style> blocks and scripts.
 function sanitizeGhostHtml(html: string): string {
-  return html
-    // Remove <!DOCTYPE ...>
+  return html.replace(
+    /<head[^>]*>([\s\S]*?)<\/head>/gi,
+    (_match, headContent: string) => {
+      // Extract <style> blocks from <head> — keep them, drop the rest
+      const styles: string[] = [];
+      headContent.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, (style: string) => {
+        // Remove body-only rules (already handled by layout)
+        const cleaned = style.replace(/body\s*\{[^}]*\}/g, "").replace(/@import\s+url\([^)]*fonts\.googleapis[^)]*\)[^;]*;/gi, "");
+        if (cleaned.replace(/<\/?style[^>]*>/gi, "").trim()) {
+          styles.push(cleaned);
+        }
+        return "";
+      });
+      return styles.join("\n");
+    }
+  )
     .replace(/<!DOCTYPE[^>]*>/gi, "")
-    // Remove <html ...> and </html>
     .replace(/<\/?html[^>]*>/gi, "")
-    // Remove entire <head>...</head> blocks
-    .replace(/<head[\s\S]*?<\/head>/gi, "")
-    // Remove <body ...> and </body> (keep inner content)
     .replace(/<\/?body[^>]*>/gi, "")
-    // Remove Tailwind CDN script tags (we already have Tailwind)
+    .replace(/<title[^>]*>[\s\S]*?<\/title>/gi, "")
+    .replace(/<meta[^>]*>/gi, "")
+    // Remove Tailwind CDN (we already have Tailwind via Vite)
     .replace(/<script[^>]*src=["'][^"']*tailwindcss[^"']*["'][^>]*>[\s\S]*?<\/script>/gi, "")
-    // Remove inline tailwind.config scripts
-    .replace(/<script[^>]*>\s*tailwind\.config\s*=[\s\S]*?<\/script>/gi, "")
-    // Remove redundant <style> blocks that set body/font-family (already handled by layout)
-    .replace(/<style[^>]*>\s*body\s*\{[^}]*\}\s*<\/style>/gi, "");
+    .replace(/<script[^>]*>\s*tailwind\.config\s*=[\s\S]*?<\/script>/gi, "");
 }
 
 const cleanHtml = sanitizeGhostHtml(post.html || "");
