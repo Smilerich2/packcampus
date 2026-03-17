@@ -13,32 +13,17 @@ const { slug } = Astro.params;
 const post = await ghost.posts.read({ slug }, { include: "tags,authors" });
 
 // Sanitize embedded full HTML documents in Ghost HTML cards.
-// Strips document-level wrappers but preserves <style> blocks and scripts.
+// Only strips document-level structure tags that break DOM.
+// Preserves <style>, <script>, Google Fonts, and Tailwind CDN.
 function sanitizeGhostHtml(html: string): string {
-  return html.replace(
-    /<head[^>]*>([\s\S]*?)<\/head>/gi,
-    (_match, headContent: string) => {
-      // Extract <style> blocks from <head> — keep them, drop the rest
-      const styles: string[] = [];
-      headContent.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, (style: string) => {
-        // Remove body-only rules (already handled by layout)
-        const cleaned = style.replace(/body\s*\{[^}]*\}/g, "").replace(/@import\s+url\([^)]*fonts\.googleapis[^)]*\)[^;]*;/gi, "");
-        if (cleaned.replace(/<\/?style[^>]*>/gi, "").trim()) {
-          styles.push(cleaned);
-        }
-        return "";
-      });
-      return styles.join("\n");
-    }
-  )
+  return html
     .replace(/<!DOCTYPE[^>]*>/gi, "")
     .replace(/<\/?html[^>]*>/gi, "")
+    .replace(/<head[^>]*>/gi, "")
+    .replace(/<\/head>/gi, "")
     .replace(/<\/?body[^>]*>/gi, "")
     .replace(/<title[^>]*>[\s\S]*?<\/title>/gi, "")
-    .replace(/<meta[^>]*>/gi, "")
-    // Remove Tailwind CDN (we already have Tailwind via Vite)
-    .replace(/<script[^>]*src=["'][^"']*tailwindcss[^"']*["'][^>]*>[\s\S]*?<\/script>/gi, "")
-    .replace(/<script[^>]*>\s*tailwind\.config\s*=[\s\S]*?<\/script>/gi, "");
+    .replace(/<meta[^>]*>/gi, "");
 }
 
 const cleanHtml = sanitizeGhostHtml(post.html || "");
