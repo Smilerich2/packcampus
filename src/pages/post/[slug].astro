@@ -11,6 +11,27 @@ const ghost = new GhostContentAPI({
 const { slug } = Astro.params;
 
 const post = await ghost.posts.read({ slug }, { include: "tags,authors" });
+
+// Sanitize embedded full HTML documents in Ghost HTML cards
+function sanitizeGhostHtml(html: string): string {
+  return html
+    // Remove <!DOCTYPE ...>
+    .replace(/<!DOCTYPE[^>]*>/gi, "")
+    // Remove <html ...> and </html>
+    .replace(/<\/?html[^>]*>/gi, "")
+    // Remove entire <head>...</head> blocks
+    .replace(/<head[\s\S]*?<\/head>/gi, "")
+    // Remove <body ...> and </body> (keep inner content)
+    .replace(/<\/?body[^>]*>/gi, "")
+    // Remove Tailwind CDN script tags (we already have Tailwind)
+    .replace(/<script[^>]*src=["'][^"']*tailwindcss[^"']*["'][^>]*>[\s\S]*?<\/script>/gi, "")
+    // Remove inline tailwind.config scripts
+    .replace(/<script[^>]*>\s*tailwind\.config\s*=[\s\S]*?<\/script>/gi, "")
+    // Remove redundant <style> blocks that set body/font-family (already handled by layout)
+    .replace(/<style[^>]*>\s*body\s*\{[^}]*\}\s*<\/style>/gi, "");
+}
+
+const cleanHtml = sanitizeGhostHtml(post.html || "");
 ---
 
 <Layout title={post.title}>
@@ -102,7 +123,7 @@ const post = await ghost.posts.read({ slug }, { include: "tags,authors" });
             prose-blockquote:border-orange-400 prose-blockquote:bg-orange-50/50 prose-blockquote:rounded-r-lg prose-blockquote:py-1 prose-blockquote:px-1 prose-blockquote:text-gray-600 prose-blockquote:not-italic
             prose-li:text-gray-600
             prose-ul:my-6 prose-ol:my-6"
-          set:html={post.html}
+          set:html={cleanHtml}
         />
 
         <div class="mt-16 pt-8 border-t border-gray-100">
