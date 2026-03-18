@@ -13,32 +13,36 @@ const { slug } = Astro.params;
 const post = await ghost.posts.read({ slug }, { include: "tags,authors" });
 
 // Sanitize embedded full HTML documents in Ghost HTML cards.
-// Extracts <style> from <head> and <body> content. Drops <head> scripts (Tailwind CDN
-// Preflight resets all heading styles globally, breaking prose typography).
+// Preserves <style> and <script> from <head>, but patches any tailwind.config
+// to disable Preflight (which resets all heading styles globally).
 function sanitizeGhostHtml(html: string): string {
   if (!html) return "";
 
-  // Finde komplette HTML-Dokumente in Ghost HTML-Karten
   const fullDocRegex = /<(?:!DOCTYPE|html)[^>]*>[\s\S]*?<\/html>/gi;
 
   let cleaned = html.replace(fullDocRegex, (fullDoc) => {
-    // A. Nur <style> aus dem <head> retten (NICHT <script> — Tailwind CDN Preflight
-    //    setzt alle Headings auf font-size/font-weight:inherit und bricht prose)
-    const styles: string[] = [];
+    // A. <style> und <script> aus <head> retten
+    const preserved: string[] = [];
     const headMatch = fullDoc.match(/<head[^>]*>([\s\S]*?)<\/head>/i);
     if (headMatch) {
-      const styleRegex = /<style[^>]*>[\s\S]*?<\/style>/gi;
+      const tagRegex = /<(?:style|script)[^>]*>[\s\S]*?<\/(?:style|script)>/gi;
       let match;
-      while ((match = styleRegex.exec(headMatch[1])) !== null) {
-        styles.push(match[0]);
+      while ((match = tagRegex.exec(headMatch[1])) !== null) {
+        let tag = match[0];
+        // Tailwind CDN config: Preflight deaktivieren damit prose-Headings nicht resettet werden
+        tag = tag.replace(
+          /tailwind\.config\s*=\s*\{/,
+          "tailwind.config = { corePlugins: { preflight: false },"
+        );
+        preserved.push(tag);
       }
     }
 
-    // B. Nur den Inhalt des <body> extrahieren (enthält Body-Scripts wie lucide natürlich)
+    // B. Body-Inhalt extrahieren (enthält eigene Scripts wie lucide)
     const bodyMatch = fullDoc.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
     const bodyContent = bodyMatch ? bodyMatch[1] : fullDoc;
 
-    return styles.join("\n") + "\n" + bodyContent;
+    return preserved.join("\n") + "\n" + bodyContent;
   });
 
   // Fallback: Verwaiste Boilerplate-Tags entfernen
