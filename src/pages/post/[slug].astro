@@ -13,14 +13,35 @@ const { slug } = Astro.params;
 const post = await ghost.posts.read({ slug }, { include: "tags,authors" });
 
 // Sanitize embedded full HTML documents in Ghost HTML cards.
-// Only strips document-level structure tags that break DOM.
-// Preserves <style>, <script>, Google Fonts, and Tailwind CDN.
+// Detects complete documents, extracts <body> content, preserves <style>/<script>.
 function sanitizeGhostHtml(html: string): string {
-  return html
+  if (!html) return "";
+
+  // Finde komplette HTML-Dokumente in Ghost HTML-Karten
+  const fullDocRegex = /<(?:!DOCTYPE|html)[^>]*>[\s\S]*?<\/html>/gi;
+
+  let cleaned = html.replace(fullDocRegex, (fullDoc) => {
+    // A. <style> und <script> Tags aus dem gesamten Dokument retten
+    const preserved: string[] = [];
+    const styleScriptRegex = /<(?:style|script)[^>]*>[\s\S]*?<\/(?:style|script)>/gi;
+    let match;
+    while ((match = styleScriptRegex.exec(fullDoc)) !== null) {
+      preserved.push(match[0]);
+    }
+
+    // B. Nur den Inhalt des <body> extrahieren
+    const bodyMatch = fullDoc.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+    const bodyContent = bodyMatch ? bodyMatch[1] : fullDoc;
+
+    // C. Styles/Scripts + Body-Inhalt zurückgeben, Rest weg
+    return preserved.join("\n") + "\n" + bodyContent;
+  });
+
+  // Fallback: Verwaiste Boilerplate-Tags entfernen
+  return cleaned
     .replace(/<!DOCTYPE[^>]*>/gi, "")
     .replace(/<\/?html[^>]*>/gi, "")
-    .replace(/<head[^>]*>/gi, "")
-    .replace(/<\/head>/gi, "")
+    .replace(/<head\b[^>]*>[\s\S]*?<\/head>/gi, "")
     .replace(/<\/?body[^>]*>/gi, "")
     .replace(/<title[^>]*>[\s\S]*?<\/title>/gi, "")
     .replace(/<meta[^>]*>/gi, "");
