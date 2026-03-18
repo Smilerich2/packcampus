@@ -13,7 +13,8 @@ const { slug } = Astro.params;
 const post = await ghost.posts.read({ slug }, { include: "tags,authors" });
 
 // Sanitize embedded full HTML documents in Ghost HTML cards.
-// Detects complete documents, extracts <body> content, preserves <style>/<script>.
+// Extracts <style> from <head> and <body> content. Drops <head> scripts (Tailwind CDN
+// Preflight resets all heading styles globally, breaking prose typography).
 function sanitizeGhostHtml(html: string): string {
   if (!html) return "";
 
@@ -21,20 +22,23 @@ function sanitizeGhostHtml(html: string): string {
   const fullDocRegex = /<(?:!DOCTYPE|html)[^>]*>[\s\S]*?<\/html>/gi;
 
   let cleaned = html.replace(fullDocRegex, (fullDoc) => {
-    // A. <style> und <script> Tags aus dem gesamten Dokument retten
-    const preserved: string[] = [];
-    const styleScriptRegex = /<(?:style|script)[^>]*>[\s\S]*?<\/(?:style|script)>/gi;
-    let match;
-    while ((match = styleScriptRegex.exec(fullDoc)) !== null) {
-      preserved.push(match[0]);
+    // A. Nur <style> aus dem <head> retten (NICHT <script> — Tailwind CDN Preflight
+    //    setzt alle Headings auf font-size/font-weight:inherit und bricht prose)
+    const styles: string[] = [];
+    const headMatch = fullDoc.match(/<head[^>]*>([\s\S]*?)<\/head>/i);
+    if (headMatch) {
+      const styleRegex = /<style[^>]*>[\s\S]*?<\/style>/gi;
+      let match;
+      while ((match = styleRegex.exec(headMatch[1])) !== null) {
+        styles.push(match[0]);
+      }
     }
 
-    // B. Nur den Inhalt des <body> extrahieren
+    // B. Nur den Inhalt des <body> extrahieren (enthält Body-Scripts wie lucide natürlich)
     const bodyMatch = fullDoc.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
     const bodyContent = bodyMatch ? bodyMatch[1] : fullDoc;
 
-    // C. Styles/Scripts + Body-Inhalt zurückgeben, Rest weg
-    return preserved.join("\n") + "\n" + bodyContent;
+    return styles.join("\n") + "\n" + bodyContent;
   });
 
   // Fallback: Verwaiste Boilerplate-Tags entfernen
