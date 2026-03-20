@@ -459,8 +459,23 @@ audio::-webkit-media-controls-mute-button {
   object-fit: cover;
 }
 
-/* ── Ghost Tables ── */
-.prose :where(table) {
+/* ── Ghost Tables: Reset prose defaults then restyle ── */
+.prose table,
+.prose thead,
+.prose thead th,
+.prose tbody tr,
+.prose tbody td,
+.prose tfoot,
+.prose tfoot td {
+  border: none !important;
+  border-color: transparent !important;
+  border-width: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  background: none !important;
+}
+
+.prose table {
   width: 100% !important;
   border-collapse: separate !important;
   border-spacing: 0 !important;
@@ -469,71 +484,45 @@ audio::-webkit-media-controls-mute-button {
   font-size: 0.875rem !important;
   line-height: 1.5 !important;
   background: #fff !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(0, 0, 0, 0.04) !important;
-  margin-top: 1.5rem !important;
-  margin-bottom: 1.5rem !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 0 0 1px #e5e7eb !important;
+  margin-top: 2rem !important;
+  margin-bottom: 2rem !important;
 }
 
-.prose :where(thead) {
-  border-bottom: none !important;
-}
-
-.prose :where(thead th) {
-  padding: 0.875rem 1.25rem !important;
-  font-weight: 700 !important;
-  font-size: 0.6875rem !important;
+.prose thead th {
+  padding: 0.75rem 1.25rem !important;
+  font-weight: 600 !important;
+  font-size: 0.75rem !important;
   text-transform: uppercase !important;
-  letter-spacing: 0.08em !important;
-  color: #9ca3af !important;
+  letter-spacing: 0.06em !important;
+  color: #6b7280 !important;
   text-align: left !important;
-  background: linear-gradient(to bottom, #f9fafb, #f3f4f6) !important;
+  background: #f9fafb !important;
   border-bottom: 1px solid #e5e7eb !important;
-  border-right: 1px solid #e5e7eb;
   vertical-align: middle !important;
 }
 
-.prose :where(thead th:last-child) {
-  border-right: none;
-}
-
-.prose :where(tbody td) {
-  padding: 0.875rem 1.25rem !important;
+.prose tbody td {
+  padding: 0.75rem 1.25rem !important;
   color: #4b5563 !important;
-  border-bottom: 1px solid #f3f4f6 !important;
-  border-right: 1px solid #f3f4f6;
-  border-top: none !important;
   vertical-align: middle !important;
+  background: #fff !important;
+  border-bottom: 1px solid #f3f4f6 !important;
 }
 
-.prose :where(tbody td:last-child) {
-  border-right: none;
-}
-
-.prose :where(tbody tr:last-child td) {
+.prose tbody tr:last-child td {
   border-bottom: none !important;
 }
 
-.prose :where(tbody tr) {
-  transition: background-color 0.2s ease;
+.prose tbody tr {
+  transition: background-color 0.15s ease !important;
 }
 
-.prose :where(tbody tr:hover) {
-  background: #fff7ed;
+.prose tbody tr:hover td {
+  background: #fff7ed !important;
 }
 
-.prose :where(tbody td:first-child) {
+.prose tbody td:first-child {
   font-weight: 600 !important;
   color: #111827 !important;
-  position: relative;
-}
-
-.prose :where(tbody tr:hover td:first-child)::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 25%;
-  bottom: 25%;
-  width: 3px;
-  border-radius: 0 3px 3px 0;
-  background: #f97316;
 }
