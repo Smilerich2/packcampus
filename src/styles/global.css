@@ -458,3 +458,56 @@ audio::-webkit-media-controls-mute-button {
   height: 100%;
   object-fit: cover;
 }
+
+/* ── Ghost Tables ── */
+.prose table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  font-size: 0.875rem;
+}
+
+.prose thead {
+  background: #f9fafb;
+}
+
+.prose thead th {
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #6b7280;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.prose tbody tr {
+  transition: background-color 0.15s;
+}
+
+.prose tbody tr:nth-child(even) {
+  background: #f9fafb;
+}
+
+.prose tbody tr:hover {
+  background: #fff7ed;
+}
+
+.prose tbody td {
+  padding: 0.75rem 1rem;
+  color: #374151;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.prose tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.prose tbody td:first-child {
+  font-weight: 500;
+  color: #111827;
+}
