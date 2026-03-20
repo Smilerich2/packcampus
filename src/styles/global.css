@@ -459,70 +459,81 @@ audio::-webkit-media-controls-mute-button {
   object-fit: cover;
 }
 
-/* ── Ghost Tables: Reset prose defaults then restyle ── */
-.prose table,
-.prose thead,
-.prose thead th,
-.prose tbody tr,
-.prose tbody td,
-.prose tfoot,
-.prose tfoot td {
-  border: none !important;
-  border-color: transparent !important;
-  border-width: 0 !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  background: none !important;
-}
+/* ── Ghost Tables ──
+   Tailwind Typography sets aggressive table defaults.
+   We use @layer + high specificity to fully override them. */
 
-.prose table {
+.prose.prose table {
+  all: unset !important;
+  display: table !important;
   width: 100% !important;
   border-collapse: separate !important;
   border-spacing: 0 !important;
-  border-radius: 1rem !important;
-  overflow: hidden !important;
   font-size: 0.875rem !important;
-  line-height: 1.5 !important;
-  background: #fff !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 0 0 1px #e5e7eb !important;
-  margin-top: 2rem !important;
-  margin-bottom: 2rem !important;
+  line-height: 1.6 !important;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+  margin: 2rem 0 !important;
+  background: #ffffff !important;
+  border-radius: 0.75rem !important;
+  overflow: hidden !important;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.05),
+    0 2px 8px rgba(0, 0, 0, 0.04) !important;
 }
 
-.prose thead th {
+.prose.prose thead {
+  all: unset !important;
+  display: table-header-group !important;
+}
+
+.prose.prose thead th {
+  all: unset !important;
+  display: table-cell !important;
   padding: 0.75rem 1.25rem !important;
+  font-size: 0.6875rem !important;
   font-weight: 600 !important;
-  font-size: 0.75rem !important;
-  text-transform: uppercase !important;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
   letter-spacing: 0.06em !important;
-  color: #6b7280 !important;
+  text-transform: uppercase !important;
   text-align: left !important;
-  background: #f9fafb !important;
-  border-bottom: 1px solid #e5e7eb !important;
   vertical-align: middle !important;
+  color: #f97316 !important;
+  background: #fffbf5 !important;
+  border-bottom: 2px solid #fed7aa !important;
 }
 
-.prose tbody td {
-  padding: 0.75rem 1.25rem !important;
-  color: #4b5563 !important;
-  vertical-align: middle !important;
-  background: #fff !important;
-  border-bottom: 1px solid #f3f4f6 !important;
+.prose.prose tbody {
+  all: unset !important;
+  display: table-row-group !important;
 }
 
-.prose tbody tr:last-child td {
-  border-bottom: none !important;
-}
-
-.prose tbody tr {
+.prose.prose tbody tr {
+  all: unset !important;
+  display: table-row !important;
   transition: background-color 0.15s ease !important;
 }
 
-.prose tbody tr:hover td {
-  background: #fff7ed !important;
+.prose.prose tbody tr:hover {
+  background-color: #fff7ed !important;
 }
 
-.prose tbody td:first-child {
+.prose.prose tbody td {
+  all: unset !important;
+  display: table-cell !important;
+  padding: 0.75rem 1.25rem !important;
+  font-size: 0.875rem !important;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+  line-height: 1.6 !important;
+  vertical-align: middle !important;
+  color: #4b5563 !important;
+  border-bottom: 1px solid #f3f4f6 !important;
+}
+
+.prose.prose tbody tr:last-child td {
+  border-bottom: none !important;
+}
+
+.prose.prose tbody td:first-child {
   font-weight: 600 !important;
   color: #111827 !important;
 }
