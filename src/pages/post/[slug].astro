@@ -187,5 +187,16 @@ const cleanHtml = sanitizeGhostHtml(post.html || "");
       if (overlay) overlay.remove();
       if (playerBar) playerBar.remove();
     });
+
+    // Clean tables: strip inline styles (often pasted from Google Docs with !important)
+    // and convert thead <td> to <th> for proper semantics
+    document.querySelectorAll(".prose table").forEach((table) => {
+      table.querySelectorAll("[style]").forEach((el) => el.removeAttribute("style"));
+      table.querySelectorAll("thead td").forEach((td) => {
+        const th = document.createElement("th");
+        th.innerHTML = td.innerHTML;
+        td.replaceWith(th);
+      });
+    });
   </script>
 </Layout>
