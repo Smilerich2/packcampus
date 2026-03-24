@@ -53,7 +53,7 @@ tailwind.config = {
   ...(window.tailwind?.config || {}),
   theme: {
     ...(window.tailwind?.config?.theme || {}),
-    screens: { sm: '480px', md: '580px', lg: '768px', xl: '1024px', '2xl': '1280px' }
+    screens: { sm: '480px', md: '640px', lg: '768px', xl: '1024px', '2xl': '1280px' }
   }
 };
 </script>`;
@@ -140,7 +140,7 @@ const proseClasses = `prose prose-lg prose-gray max-w-none
       </div>
     )}
 
-    <article class={`relative z-10 max-w-3xl mx-auto px-4 sm:px-6 pb-16 sm:pb-24 ${post.feature_image ? 'pt-16 sm:pt-24 md:pt-32 lg:pt-40' : 'pt-10 sm:pt-16'}`}>
+    <article class={`relative z-10 max-w-4xl mx-auto px-4 sm:px-6 pb-16 sm:pb-24 ${post.feature_image ? 'pt-16 sm:pt-24 md:pt-32 lg:pt-40' : 'pt-10 sm:pt-16'}`}>
       <div class={post.feature_image ? 'bg-white/95 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-200/60 p-5 sm:p-8 md:p-10' : ''}>
         <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-gray-400 mb-4 sm:mb-6">
           {post.primary_tag && (
