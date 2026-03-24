@@ -233,7 +233,7 @@ const proseClasses = `prose prose-lg prose-gray max-w-none
       });
     });
 
-    // Auto-resize Ghost widget iframes to match their content height.
+    // Auto-resize Ghost widget iframes to show full content without scrolling.
     // srcdoc iframes are same-origin, so contentDocument access works.
     document.querySelectorAll(".ghost-widget-frame").forEach((iframe) => {
       iframe.addEventListener("load", () => {
@@ -241,13 +241,26 @@ const proseClasses = `prose prose-lg prose-gray max-w-none
         const doc = el.contentDocument;
         if (!doc) return;
 
-        // Prevent scrollbars inside iframe — let parent handle overflow
-        doc.documentElement.style.overflow = "hidden";
+        // Match parent background so iframe blends seamlessly
+        doc.body.style.background = "transparent";
+        doc.documentElement.style.background = "transparent";
 
         const resize = () => {
-          const h = doc.documentElement.scrollHeight;
-          if (h) el.style.height = h + "px";
+          // Temporarily allow overflow so we can measure true content height
+          doc.documentElement.style.overflow = "visible";
+          el.style.height = "auto";
+
+          const h = Math.max(
+            doc.body.scrollHeight,
+            doc.body.offsetHeight,
+            doc.documentElement.scrollHeight
+          );
+          el.style.height = h + "px";
+
+          // Now hide overflow to prevent scrollbars
+          doc.documentElement.style.overflow = "hidden";
         };
+
         resize();
         new ResizeObserver(resize).observe(doc.body);
       });

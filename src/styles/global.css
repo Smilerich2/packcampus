@@ -9,12 +9,13 @@
 .ghost-widget-frame {
   width: 100%;
   border: none;
-  margin: 2rem 0;
-  border-radius: 0.75rem;
-  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  border-radius: 0;
   display: block;
   min-height: 200px;
-  transition: height 0.2s ease;
+  background: transparent;
+  box-shadow: none;
 }
 
 /* ── KaTeX Block Formulas ── */
