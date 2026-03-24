@@ -42,7 +42,25 @@ function splitGhostContent(html: string): ContentSegment[] {
       // Extract <title> for iframe accessibility
       const titleMatch = cardContent.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
       const title = titleMatch ? titleMatch[1].trim() : "Interaktiver Inhalt";
-      segments.push({ type: "iframe", html: cardContent, title });
+
+      // Adjust Tailwind breakpoints for iframe context.
+      // The iframe is narrower than the viewport (~620-700px inside the article card),
+      // so standard md:768px breakpoints never trigger. Lower them to match.
+      let iframeHtml = cardContent;
+      if (/cdn\.tailwindcss\.com/i.test(cardContent)) {
+        const bpConfig = `<script>
+tailwind.config = {
+  ...(window.tailwind?.config || {}),
+  theme: {
+    ...(window.tailwind?.config?.theme || {}),
+    screens: { sm: '480px', md: '580px', lg: '768px', xl: '1024px', '2xl': '1280px' }
+  }
+};
+</script>`;
+        iframeHtml = iframeHtml.replace('</head>', bpConfig + '</head>');
+      }
+
+      segments.push({ type: "iframe", html: iframeHtml, title });
     } else {
       // Simple HTML snippet — keep as prose
       segments.push({ type: "prose", html: cardContent });
@@ -219,13 +237,19 @@ const proseClasses = `prose prose-lg prose-gray max-w-none
     // srcdoc iframes are same-origin, so contentDocument access works.
     document.querySelectorAll(".ghost-widget-frame").forEach((iframe) => {
       iframe.addEventListener("load", () => {
+        const el = iframe as HTMLIFrameElement;
+        const doc = el.contentDocument;
+        if (!doc) return;
+
+        // Prevent scrollbars inside iframe — let parent handle overflow
+        doc.documentElement.style.overflow = "hidden";
+
         const resize = () => {
-          const body = (iframe as HTMLIFrameElement).contentDocument?.body;
-          if (body) (iframe as HTMLIFrameElement).style.height = body.scrollHeight + "px";
+          const h = doc.documentElement.scrollHeight;
+          if (h) el.style.height = h + "px";
         };
         resize();
-        const body = (iframe as HTMLIFrameElement).contentDocument?.body;
-        if (body) new ResizeObserver(resize).observe(body);
+        new ResizeObserver(resize).observe(doc.body);
       });
     });
   </script>
