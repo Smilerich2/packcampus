@@ -11,12 +11,17 @@
   --color-brand-600: #ea580c;
   --color-brand-700: #c2410c;
   --color-brand-900: #7c2d12;
-  /* Amber: not used in static templates but needed by Ghost callout blocks */
+  /* Colors for Ghost HTML callout blocks (not in static templates, so must be explicit) */
   --color-amber-50: #fffbeb;
   --color-amber-200: #fde68a;
   --color-amber-500: #f59e0b;
   --color-amber-800: #92400e;
   --color-amber-900: #78350f;
+  --color-indigo-50: #eef2ff;
+  --color-indigo-200: #c7d2fe;
+  --color-indigo-500: #6366f1;
+  --color-indigo-800: #3730a3;
+  --color-indigo-900: #312e81;
 }
 
 /* ── Ghost Widget iframes (full HTML docs in Ghost HTML cards) ── */
@@ -44,27 +49,6 @@
   white-space: nowrap;
 }
 
-/* ── Callout Whitespace Fix ── */
-.callout-content p {
-  margin: 0.25rem 0 !important;
-}
-
-.callout-content p:first-child {
-  margin-top: 0 !important;
-}
-
-.callout-content p:last-child {
-  margin-bottom: 0 !important;
-}
-
-.callout-content .katex-display {
-  margin: 0.5rem 0 !important;
-}
-
-.callout-content p:empty,
-.callout-content br {
-  display: none !important;
-}
 
 /* ── Premium Glossary ── */
 .premium-scroll::-webkit-scrollbar { width: 6px; }
