@@ -12,50 +12,66 @@ const { slug } = Astro.params;
 
 const post = await ghost.posts.read({ slug }, { include: "tags,authors" });
 
-// Sanitize embedded full HTML documents in Ghost HTML cards.
-// Preserves <style> and <script> from <head>, but patches any tailwind.config
-// to disable Preflight (which resets all heading styles globally).
-function sanitizeGhostHtml(html: string): string {
-  if (!html) return "";
+// Split Ghost HTML into prose segments and iframe segments (full HTML documents).
+// Full HTML docs in Ghost HTML cards get rendered in isolated iframes,
+// simple HTML snippets stay in the prose container.
+type ContentSegment =
+  | { type: "prose"; html: string }
+  | { type: "iframe"; html: string; title: string };
 
-  const fullDocRegex = /<(?:!DOCTYPE|html)[^>]*>[\s\S]*?<\/html>/gi;
+function splitGhostContent(html: string): ContentSegment[] {
+  if (!html) return [];
 
-  let cleaned = html.replace(fullDocRegex, (fullDoc) => {
-    // A. <style> und <script> aus <head> retten
-    const preserved: string[] = [];
-    const headMatch = fullDoc.match(/<head[^>]*>([\s\S]*?)<\/head>/i);
-    if (headMatch) {
-      const tagRegex = /<(?:style|script)[^>]*>[\s\S]*?<\/(?:style|script)>/gi;
-      let match;
-      while ((match = tagRegex.exec(headMatch[1])) !== null) {
-        let tag = match[0];
-        // Tailwind CDN config: Preflight deaktivieren damit prose-Headings nicht resettet werden
-        tag = tag.replace(
-          /tailwind\.config\s*=\s*\{/,
-          "tailwind.config = { corePlugins: { preflight: false },"
-        );
-        preserved.push(tag);
-      }
+  const segments: ContentSegment[] = [];
+  const cardRegex = /<!--kg-card-begin: html-->([\s\S]*?)<!--kg-card-end: html-->/gi;
+
+  let lastIndex = 0;
+  let match;
+
+  while ((match = cardRegex.exec(html)) !== null) {
+    // Prose content before this HTML card
+    if (match.index > lastIndex) {
+      const prose = html.slice(lastIndex, match.index).trim();
+      if (prose) segments.push({ type: "prose", html: prose });
     }
 
-    // B. Body-Inhalt extrahieren (enthält eigene Scripts wie lucide)
-    const bodyMatch = fullDoc.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
-    const bodyContent = bodyMatch ? bodyMatch[1] : fullDoc;
+    const cardContent = match[1].trim();
+    const isFullDoc = /<!DOCTYPE\s|<html[\s>]/i.test(cardContent);
 
-    return preserved.join("\n") + "\n" + bodyContent;
-  });
+    if (isFullDoc) {
+      // Extract <title> for iframe accessibility
+      const titleMatch = cardContent.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+      const title = titleMatch ? titleMatch[1].trim() : "Interaktiver Inhalt";
+      segments.push({ type: "iframe", html: cardContent, title });
+    } else {
+      // Simple HTML snippet — keep as prose
+      segments.push({ type: "prose", html: cardContent });
+    }
 
-  // Fallback: Verwaiste Boilerplate-Tags entfernen
-  return cleaned
-    .replace(/<!DOCTYPE[^>]*>/gi, "")
-    .replace(/<\/?html[^>]*>/gi, "")
-    .replace(/<head\b[^>]*>[\s\S]*?<\/head>/gi, "")
-    .replace(/<\/?body[^>]*>/gi, "")
-    .replace(/<title[^>]*>[\s\S]*?<\/title>/gi, "")
-    .replace(/<meta[^>]*>/gi, "");
+    lastIndex = match.index + match[0].length;
+  }
+
+  // Remaining prose content after last HTML card
+  if (lastIndex < html.length) {
+    const prose = html.slice(lastIndex).trim();
+    if (prose) segments.push({ type: "prose", html: prose });
+  }
+
+  return segments;
 }
 
-const cleanHtml = sanitizeGhostHtml(post.html || "");
+const segments = splitGhostContent(post.html || "");
+
+const proseClasses = `prose prose-lg prose-gray max-w-none
+  prose-headings:font-semibold prose-headings:tracking-tight
+  prose-h2:text-2xl prose-h2:mt-12 prose-h2:mb-4
+  prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-3
+  prose-p:leading-relaxed prose-p:text-gray-600
+  prose-a:text-orange-600 prose-a:no-underline hover:prose-a:underline
+  prose-strong:text-gray-800 prose-strong:font-semibold
+  prose-blockquote:border-orange-400 prose-blockquote:bg-orange-50/50 prose-blockquote:rounded-r-lg prose-blockquote:py-1 prose-blockquote:px-1 prose-blockquote:text-gray-600 prose-blockquote:not-italic
+  prose-li:text-gray-600
+  prose-ul:my-6 prose-ol:my-6`;
 ---
 
 <Layout title={post.title}>
@@ -136,19 +152,19 @@ const cleanHtml = sanitizeGhostHtml(post.html || "");
 
         <div class="mt-8 mb-10 h-px bg-gradient-to-r from-orange-200 via-orange-100 to-transparent" />
 
-        <div
-          class="prose prose-lg prose-gray max-w-none
-            prose-headings:font-semibold prose-headings:tracking-tight
-            prose-h2:text-2xl prose-h2:mt-12 prose-h2:mb-4
-            prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-3
-            prose-p:leading-relaxed prose-p:text-gray-600
-            prose-a:text-orange-600 prose-a:no-underline hover:prose-a:underline
-            prose-strong:text-gray-800 prose-strong:font-semibold
-            prose-blockquote:border-orange-400 prose-blockquote:bg-orange-50/50 prose-blockquote:rounded-r-lg prose-blockquote:py-1 prose-blockquote:px-1 prose-blockquote:text-gray-600 prose-blockquote:not-italic
-            prose-li:text-gray-600
-            prose-ul:my-6 prose-ol:my-6"
-          set:html={cleanHtml}
-        />
+        {segments.map(seg =>
+          seg.type === "prose" ? (
+            <div class={proseClasses} set:html={seg.html} />
+          ) : (
+            <iframe
+              srcdoc={seg.html}
+              title={seg.title}
+              class="ghost-widget-frame"
+              sandbox="allow-scripts allow-same-origin"
+              loading="lazy"
+            />
+          )
+        )}
 
         <div class="mt-16 pt-8 border-t border-gray-100">
           <a
@@ -196,6 +212,20 @@ const cleanHtml = sanitizeGhostHtml(post.html || "");
         const th = document.createElement("th");
         th.innerHTML = td.innerHTML;
         td.replaceWith(th);
+      });
+    });
+
+    // Auto-resize Ghost widget iframes to match their content height.
+    // srcdoc iframes are same-origin, so contentDocument access works.
+    document.querySelectorAll(".ghost-widget-frame").forEach((iframe) => {
+      iframe.addEventListener("load", () => {
+        const resize = () => {
+          const body = (iframe as HTMLIFrameElement).contentDocument?.body;
+          if (body) (iframe as HTMLIFrameElement).style.height = body.scrollHeight + "px";
+        };
+        resize();
+        const body = (iframe as HTMLIFrameElement).contentDocument?.body;
+        if (body) new ResizeObserver(resize).observe(body);
       });
     });
   </script>

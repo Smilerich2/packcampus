@@ -5,6 +5,18 @@
   --font-sans: "Inter", "system-ui", "-apple-system", "sans-serif";
 }
 
+/* ── Ghost Widget iframes (full HTML docs in Ghost HTML cards) ── */
+.ghost-widget-frame {
+  width: 100%;
+  border: none;
+  margin: 2rem 0;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  display: block;
+  min-height: 200px;
+  transition: height 0.2s ease;
+}
+
 /* ── KaTeX Block Formulas ── */
 .katex-display {
   overflow-x: auto;
