@@ -3,6 +3,14 @@
 
 @theme {
   --font-sans: "Inter", "system-ui", "-apple-system", "sans-serif";
+  /* Alias: some Ghost HTML blocks use "brand-*" instead of "orange-*" */
+  --color-brand-50: #fff7ed;
+  --color-brand-100: #ffedd5;
+  --color-brand-200: #fed7aa;
+  --color-brand-500: #f97316;
+  --color-brand-600: #ea580c;
+  --color-brand-700: #c2410c;
+  --color-brand-900: #7c2d12;
 }
 
 /* ── Ghost Widget iframes (full HTML docs in Ghost HTML cards) ── */
