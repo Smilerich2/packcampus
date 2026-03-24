@@ -11,6 +11,12 @@
   --color-brand-600: #ea580c;
   --color-brand-700: #c2410c;
   --color-brand-900: #7c2d12;
+  /* Amber: not used in static templates but needed by Ghost callout blocks */
+  --color-amber-50: #fffbeb;
+  --color-amber-200: #fde68a;
+  --color-amber-500: #f59e0b;
+  --color-amber-800: #92400e;
+  --color-amber-900: #78350f;
 }
 
 /* ── Ghost Widget iframes (full HTML docs in Ghost HTML cards) ── */
